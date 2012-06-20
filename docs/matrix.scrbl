@@ -320,5 +320,4 @@ Multiply a matrix on a column-vector.
                 
 @section[#:tag "matrix comprehensions"]{Comprehensions}
 @section{Binary Operators}
-                  
-                  
+   

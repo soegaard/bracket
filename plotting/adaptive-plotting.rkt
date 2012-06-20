@@ -17,8 +17,11 @@
 ;;; an explanation of the algorithm:
 ;;; http://yacas.sourceforge.net/Algochapter4.html#c4s1
 
-(define *debug* #t)
+;;; See 
+;;; http://scicomp.stackexchange.com/questions/2377/algorithms-for-adaptive-function-plotting
+;;; for discussion on adaptive plotting.
 
+(define *debug* #t)
 
 ; These count functions are used to measure the
 ; number of evaluations of the function to be drawn.

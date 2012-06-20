@@ -63,6 +63,8 @@
 
 ;; Behaviour when dragging parabolas and lines.
 ;; http://www.geogebra.org/forum/viewtopic.php?f=22&t=27113
+;; Write API for MathType.
+;; Support copy-paste with MathML ?
 
 (require racket/gui framework
          (except-in plot plot points)

@@ -1,4 +1,5 @@
 #lang at-exp scheme
+;; This is not in the use for the moment.
 (provide $ $quote $quote-syntax #%infix)
 
 (require "parameter.ss"

@@ -1,4 +1,8 @@
 #lang racket
+;;; This is not in use at the moment.
+;;; However it would be possible to implement Maxima-boxes
+;;; in the GUI and use Maxima as a backend with this.
+
 (require racket/tcp racket/gui/base)
 
 ;;;

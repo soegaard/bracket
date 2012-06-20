@@ -1,4 +1,8 @@
 #lang racket
+;;;
+;;; Support for MathJax and Asymptote.
+;;;
+
 (require scribble/manual
          scribble/core
          scribble/decode
