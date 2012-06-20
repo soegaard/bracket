@@ -1,5 +1,26 @@
 #lang racket
 
+#;(module bracket-graphics racket
+  (require "../graphics/graphics.rkt")
+  
+  (define-syntax (declare/provide-vars stx)
+    (syntax-case stx ()
+      [(_ id ...)
+       #'(begin
+           (define id 'id) ...
+           (provide id) ...)]))
+  
+  (provide Graphics)
+  
+  (declare/provide-vars
+   Blend Darker Hue Lighter
+   Circle Disk Line Point Rectangle
+   Text Thickness
+   ; Colors
+   Red Blue Green Black White Yellow
+   ; Options
+   ImageSize PlotRange))
+
 ;;; An ATOMIC EXPRESSION is an
 ;  - number (integer, real, complex)
 ;  - reserved symbol (pi, e, i, inf, true, false)
@@ -112,22 +133,22 @@
   ; This version prevents duplication of args.
   ; But uses apply in place of #%app
   #;(define-syntax (sym-app stx)
-    (syntax-case stx ()
-      [(_ op arg ...)
-       (quasisyntax/loc stx
-         (let ([o op]
-               [as (λ () (list arg ...))])
-           ; TODO: 1. If o is Flat, then flattened nested expression with o.
-           ; TODO: 2. If o is Listable, then ...
-           ; TODO: 3. If o is Orderless then ...
-           ; TODO: 4. If o has associated rules ...
-           ; TODO: 
-           ; REF: http://reference.wolfram.com/mathematica/tutorial/Evaluation.html
-           (if (procedure? o)
-               #,(syntax/loc stx (apply o (as)))
-               (if (holdable? o)
-                   (cons o '(arg ...))
-                   (cons o (as))))))])))               
+      (syntax-case stx ()
+        [(_ op arg ...)
+         (quasisyntax/loc stx
+           (let ([o op]
+                 [as (λ () (list arg ...))])
+             ; TODO: 1. If o is Flat, then flattened nested expression with o.
+             ; TODO: 2. If o is Listable, then ...
+             ; TODO: 3. If o is Orderless then ...
+             ; TODO: 4. If o has associated rules ...
+             ; TODO: 
+             ; REF: http://reference.wolfram.com/mathematica/tutorial/Evaluation.html
+             (if (procedure? o)
+                 #,(syntax/loc stx (apply o (as)))
+                 (if (holdable? o)
+                     (cons o '(arg ...))
+                     (cons o (as))))))])))               
 
 (module expression-core racket
   (require (submod ".." identifiers)
@@ -204,7 +225,7 @@
           (when compound?
             (hash-set! recent-compound-expressions e #t))
           compound?)))
-        
+  
   (define (construct operator operands)
     (cons operator operands))
   
@@ -258,7 +279,7 @@
            (submod ".." undefined)
            (submod ".." identifiers))
   (require (planet dherman/memoize:3:1))
-
+  
   (provide simplify 
            simplify-plus
            simplify-minus
@@ -323,7 +344,7 @@
                 [(1)  (first vs)]
                 [(0)  0]            
                 [else (construct 'Plus vs)]))])]))
-
+  
   (define (simplify-plus-rec us)
     ; a list of terms is received,
     ; a list of simplified terms is returned.
@@ -369,9 +390,9 @@
             (λ (u2i) 
               (let ([us (simplify-plus-rec (cons u1 (list u2i)))])
                 ; If length(us)>=2 wrap with Plus
-                    (if (empty? (rest us))
-                        (first us)
-                        (construct 'Plus us))))
+                (if (empty? (rest us))
+                    (first us)
+                    (construct 'Plus us))))
             (operands u2)))]
          [(before? u2 u1) (list u2 u1)]
          [else            (list u1 u2)])]
@@ -407,7 +428,7 @@
                   (cons q1 (merge-sums p (rest q)))
                   (cons p1 (merge-sums (rest p) q)))]
          [else (error)])]))
-
+  
   (define/memo (simplify-times ops) 
     ;(displayln (list 'simplify-times ops))
     ; the operands os are simplified
@@ -530,106 +551,106 @@
     ; See [Cohen] for the complete algorithm and explanation.
     (define result
       (cond
-      [(and (number? u) (number? v))
-       ; straightforward for two real numbers,
-       ; but complex numbers must be handled too.
-       (if (= u v)
-           #t
-           (if (real? u)
-               (if (real? v) (< u v) v)
-               (if (real? v)
-                   v
-                   (if (= (imag-part u) (imag-part v))
-                       (< (real-part u) (real-part v))
-                       (< (imag-part u) (imag-part v))))))]
-      ; Number always come first
-      [(number? u) #t]
-      [(number? v) #f]
-      ; Symbols are sorted in alphabetical order
-      [(and (symbol? u) (symbol? v))
-       (string<? (symbol->string u) (symbol->string v))]
-      ; For products and sums order on the last different
-      ; factor or term. Thus x+y < y+z.
-      [(or (and (times-expression? u) (times-expression? v))
-           (and (plus-expression? u)  (plus-expression? v)))
-       (define first-non-equal
-         (for/first ([ui (in-list (reverse (operands u)))]
-                     [vi (in-list (reverse (operands v)))]
-                     #:unless (equal? ui vi))
-           (list ui vi)))
-       (if first-non-equal
-           (apply before? first-non-equal)
-           (< (length (operands u)) (length (operands v))))]
-      ; When comparing a product with something else, use the last factor.
-      ; Thus     x*y < z   and   y < x*z.
-      ; Note: This is consistent with comparisons of two products since
-      ;          x*y < 1*z and 1*y < x*z.
-      [(and (times-expression? u)
-            (or ;(power-expression? v)
-                ;(plus-expression? v)
-                (symbolic-id? v)
-                (compound-expression? v)))
-       (let ([un (last-operand u)])
-         (or (equal? un v) (before? un v)))]
-      [(and (times-expression? v)
-            (or ;(power-expression? v)
-                ;(plus-expression? v)
-                (symbolic-id? u)
-                (compound-expression? u)))
-       (define vn (last-operand v))
-       (or (equal? vn u) (before? u vn))]
-      ; Powers with smallest base are first.  2^z < 3^y
-      [(and (power-expression? u) (power-expression? v))
-       (if (equal? (base u) (base v))
-           (before? (exponent u) (exponent v))
-           (before? (base u) (base v)))]
-      ; When comparing a product with something else, pretend
-      ; the else part is a power with exponent 1.
-      ; Thus x^2 > x.
-      [(and (power-expression? u)
-            (or ; (plus-expression? v)
-                (symbolic-id? v)
-                (compound-expression? v)))
-       (before? u (construct 'Power (list v 1)))]
-      [(and (power-expression? v)
-            (or ; (plus-expression? v)
-                (symbolic-id? u)
-                (compound-expression? u)))
-       (before? (construct 'Power (list u 1)) v)]
-      ; Same trick with sums. Thus x+(-1) < x (+0) 
-      [(and (plus-expression? u)
-            (or (symbolic-id? v)
-                (compound-expression? v)))
-       (before? u (construct 'Plus (list v)))]
-      [(and (plus-expression? v)
-            (or (symbolic-id? u)
-                (compound-expression? u)))
-       (before? (construct 'Plus (list u)) v)]
-      ; Here only function applications are left.
-      ; Sort after name.
-      [(and (compound-expression? u) (compound-expression? v))
-       (if (not (equal? (kind u) (kind v)))
-           (before? (kind u) (kind v))
-           (let ()
-             ; If the names are equal, sort after the first
-             ; non-equal operand.
-             (define first-non-equal
-               (for/first ([ui (in-list (operands u))]
-                           [vi (in-list (operands v))]
-                           #:unless (equal? ui vi))
-                 (list ui vi)))
-             (if first-non-equal
-                 (apply before? first-non-equal)
-                 (< (length (operands u)) (length (operands v))))))]
-      [(compound-expression? u)
-       #f]
-      [(compound-expression? v)
-       #t]
-      [else
-       (error 'before? "Internal error: A case is missing, got ~a and ~a" u v)]
-      ; TODO : This isn't done
-      ; some rules are missing ... functions????
-      ))
+        [(and (number? u) (number? v))
+         ; straightforward for two real numbers,
+         ; but complex numbers must be handled too.
+         (if (= u v)
+             #t
+             (if (real? u)
+                 (if (real? v) (< u v) v)
+                 (if (real? v)
+                     v
+                     (if (= (imag-part u) (imag-part v))
+                         (< (real-part u) (real-part v))
+                         (< (imag-part u) (imag-part v))))))]
+        ; Number always come first
+        [(number? u) #t]
+        [(number? v) #f]
+        ; Symbols are sorted in alphabetical order
+        [(and (symbol? u) (symbol? v))
+         (string<? (symbol->string u) (symbol->string v))]
+        ; For products and sums order on the last different
+        ; factor or term. Thus x+y < y+z.
+        [(or (and (times-expression? u) (times-expression? v))
+             (and (plus-expression? u)  (plus-expression? v)))
+         (define first-non-equal
+           (for/first ([ui (in-list (reverse (operands u)))]
+                       [vi (in-list (reverse (operands v)))]
+                       #:unless (equal? ui vi))
+             (list ui vi)))
+         (if first-non-equal
+             (apply before? first-non-equal)
+             (< (length (operands u)) (length (operands v))))]
+        ; When comparing a product with something else, use the last factor.
+        ; Thus     x*y < z   and   y < x*z.
+        ; Note: This is consistent with comparisons of two products since
+        ;          x*y < 1*z and 1*y < x*z.
+        [(and (times-expression? u)
+              (or ;(power-expression? v)
+               ;(plus-expression? v)
+               (symbolic-id? v)
+               (compound-expression? v)))
+         (let ([un (last-operand u)])
+           (or (equal? un v) (before? un v)))]
+        [(and (times-expression? v)
+              (or ;(power-expression? v)
+               ;(plus-expression? v)
+               (symbolic-id? u)
+               (compound-expression? u)))
+         (define vn (last-operand v))
+         (or (equal? vn u) (before? u vn))]
+        ; Powers with smallest base are first.  2^z < 3^y
+        [(and (power-expression? u) (power-expression? v))
+         (if (equal? (base u) (base v))
+             (before? (exponent u) (exponent v))
+             (before? (base u) (base v)))]
+        ; When comparing a product with something else, pretend
+        ; the else part is a power with exponent 1.
+        ; Thus x^2 > x.
+        [(and (power-expression? u)
+              (or ; (plus-expression? v)
+               (symbolic-id? v)
+               (compound-expression? v)))
+         (before? u (construct 'Power (list v 1)))]
+        [(and (power-expression? v)
+              (or ; (plus-expression? v)
+               (symbolic-id? u)
+               (compound-expression? u)))
+         (before? (construct 'Power (list u 1)) v)]
+        ; Same trick with sums. Thus x+(-1) < x (+0) 
+        [(and (plus-expression? u)
+              (or (symbolic-id? v)
+                  (compound-expression? v)))
+         (before? u (construct 'Plus (list v)))]
+        [(and (plus-expression? v)
+              (or (symbolic-id? u)
+                  (compound-expression? u)))
+         (before? (construct 'Plus (list u)) v)]
+        ; Here only function applications are left.
+        ; Sort after name.
+        [(and (compound-expression? u) (compound-expression? v))
+         (if (not (equal? (kind u) (kind v)))
+             (before? (kind u) (kind v))
+             (let ()
+               ; If the names are equal, sort after the first
+               ; non-equal operand.
+               (define first-non-equal
+                 (for/first ([ui (in-list (operands u))]
+                             [vi (in-list (operands v))]
+                             #:unless (equal? ui vi))
+                   (list ui vi)))
+               (if first-non-equal
+                   (apply before? first-non-equal)
+                   (< (length (operands u)) (length (operands v))))))]
+        [(compound-expression? u)
+         #f]
+        [(compound-expression? v)
+         #t]
+        [else
+         (error 'before? "Internal error: A case is missing, got ~a and ~a" u v)]
+        ; TODO : This isn't done
+        ; some rules are missing ... functions????
+        ))
     ;(displayln (format " => ~a" result))
     result
     )
@@ -743,35 +764,35 @@
          (kind u) 
          (map (λ (ui) (concurrent-substitute ui ts rs))
               (operands u))))])))
-  
+
 
 
 #;(module pattern-matching racket
-  (require (submod ".." expression))
-  (define (linear-form u x)
-    ; u expression, x a symbol
-    (if (eq? u x) 
-        (list 1 0)
-        (case (kind u)
-          [(symbol-id integer fraction real complex)
-           (list 0 u)]
-          [(Times)
-           (if (free-of u x)
-               (list 0 u)
-               (let ([u/x (Quotient u x)])
-                 (if (Free-of u/x x)
-                     (list u/x 0)
-                     #f)))]
-          [(Plus)
-           (let ([f (linear-form (operand u 1) x)])   
-             (and f
-                  (let ([r (linear-form (Minus u (operand u 1)))])
-                    (and r
-                         (list (+ (operand f 0) (operand r 0))
-                               (+ (operand f 1) (operand r 1)))))))]
-          [else
-           (and (free-of u x)
-                (list 0 u))]))))
+    (require (submod ".." expression))
+    (define (linear-form u x)
+      ; u expression, x a symbol
+      (if (eq? u x) 
+          (list 1 0)
+          (case (kind u)
+            [(symbol-id integer fraction real complex)
+             (list 0 u)]
+            [(Times)
+             (if (free-of u x)
+                 (list 0 u)
+                 (let ([u/x (Quotient u x)])
+                   (if (Free-of u/x x)
+                       (list u/x 0)
+                       #f)))]
+            [(Plus)
+             (let ([f (linear-form (operand u 1) x)])   
+               (and f
+                    (let ([r (linear-form (Minus u (operand u 1)))])
+                      (and r
+                           (list (+ (operand f 0) (operand r 0))
+                                 (+ (operand f 1) (operand r 1)))))))]
+            [else
+             (and (free-of u x)
+                  (list 0 u))]))))
 
 (module equation-expression racket
   (require (submod ".." expression))
@@ -785,68 +806,50 @@
     (values (map (curryr operand 0) (operands t=r-List)) 
             (map (curryr operand 1) (operands t=r-List)))))
 
-(module bracket-graphics racket
-  (require "../graphics/graphics.rkt")
-  
-  (define-syntax (declare/provide-vars stx)
-    (syntax-case stx ()
-      [(_ id ...)
-       #'(begin
-           (define id 'id) ...
-           (provide id) ...)]))
-  
-  (provide Graphics)
-  (declare/provide-vars
-   Blend Darker Hue Lighter
-   Circle Disk Line Point Rectangle
-   Text Thickness
-   ; Colors
-   Red Blue Green Black White Yellow
-   ; Options
-   ImageSize PlotRange  
-  ))
-  
+
+
 (module bracket racket
   (require (submod ".." number-theory)
            (submod ".." expression)
            (submod ".." undefined)
            (submod ".." equation-expression)
-           (submod ".." bracket-graphics))
+           ;(submod ".." bracket-graphics)
+           )
   (provide ; (all-from-out (submod ".." symbolic-application))
-           (rename-out [free-of Free-of]
-                       [base Base]
-                       [const Const]
-                       [term Term]
-                       [exponent Exponent]
-                       [before? Before?]
-                       [kind Kind])
-           (all-from-out (submod ".." bracket-graphics))
-           Operand
-           Operands
-           Hold
-           Complete-sub-expressions
-           Substitute
-           Sequential-substitute
-           Concurrent-substitute
-           Cons
-           List 
-           List-ref
-           Plus Minus Times Quotient Power
-           Equal
-           Expand
-           Set Member?
-           Variables
-           Map
-           Apply
-           Append
-           AppendStar
-           Sin Cos Tan Sqrt
-           Solve-quadratic
-           Solve-linear
-           List->Set
-           Define
-           Range
-           Plot)
+   (rename-out [free-of Free-of]
+               [base Base]
+               [const Const]
+               [term Term]
+               [exponent Exponent]
+               [before? Before?]
+               [kind Kind])
+   ;(all-from-out (submod ".." bracket-graphics))
+   Operand
+   Operands
+   Hold
+   Complete-sub-expressions
+   Substitute
+   Sequential-substitute
+   Concurrent-substitute
+   Cons
+   List 
+   List-ref
+   Plus Minus Times Quotient Power
+   Equal
+   Expand
+   Set Member?
+   Variables
+   Map
+   Apply
+   Append
+   AppendStar
+   Sin Cos Tan Sqrt
+   Solve-quadratic
+   Solve-linear
+   List->Set
+   Define
+   Range
+   Plot)
   
   ;;;
   ;;; INVARIANT 
@@ -888,7 +891,7 @@
   
   (define (Cons u1 u2)
     (construct 'List (cons u1 (List->list u2))))
-    
+  
   (define (Set . us)
     (construct 'Set (set->list (list->set us))))
   
@@ -1108,12 +1111,12 @@
   (define (List? u)
     (and (list? u)
          (eq? (Kind u) 'List)))
-
+  
   (define-listable (Sqr u)
     (cond
       [(real? u) (sqr u u)]
       [else      (Power u 2)]))
-
+  
   (define-syntax (define-real-function stx)
     (syntax-case stx ()
       [(_ new old)
@@ -1141,7 +1144,7 @@
   (define-real-function Ceiling ceiling)
   (define-real-function Truncate truncate)
   (define-real-function Sgn sgn)
-    
+  
   (define (Solve-quadratic a b c)
     ; return List of all solutions to ax^2+bx+c=0
     (define d (Minus (Power b 2) (Times 4 a c)))
@@ -1192,7 +1195,7 @@
   (define (N u)
     ; TODO: Improve this
     (eval u ns))
-    
+  
   (define (Plot f range [options '(List)])
     ; TODO: Implement options
     (displayln (list f range))
@@ -1206,23 +1209,23 @@
                    (λ (x) (N (Substitute f (Equal var x)))))
                x-min x-max y-min y-max excluded?)]
       [else (error)]))
-    
+  
   #;(and (real? x-min) (real? x-max) (real? y-min) (real? y-max)
          (< x-min x-max) (< y-min y-max))
   
-;  (define (Monomial-gpe u v)
-;    (define s (if (eq? (Kind v) 'set) (list v) v))
-;    (cond
-;      [(Member? u (operands s)) #t]
-;      [else
-;      (if(power-expression? u)
-;         (define base (Operand u 0))
-;         (define exponent (Operand u 1))
-;         (if (and (Member? base s)
-;                (eq? (Kind exponent) 'integer)
-;                (> exponent 1))
+  ;  (define (Monomial-gpe u v)
+  ;    (define s (if (eq? (Kind v) 'set) (list v) v))
+  ;    (cond
+  ;      [(Member? u (operands s)) #t]
+  ;      [else
+  ;      (if(power-expression? u)
+  ;         (define base (Operand u 0))
+  ;         (define exponent (Operand u 1))
+  ;         (if (and (Member? base s)
+  ;                (eq? (Kind exponent) 'integer)
+  ;                (> exponent 1))
   )
-  
+
 
 (module test racket
   (require (submod ".." symbolic-application)

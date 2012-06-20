@@ -36,7 +36,8 @@
          (strip-context   
           #'(module anything bracket-lang
               (require (submod bracket.rkt bracket)
-                       (submod bracket.rkt symbolic-application))
+                       (submod bracket.rkt symbolic-application)
+                       #;(submod bracket.rkt bracket-graphics))
               (define-syntax (#%infix stx)
                 (syntax-case stx () [(_ expr) #'expr]))              
               ; This lists the operators used by the parser.
