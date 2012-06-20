@@ -1,5 +1,7 @@
 #lang racket
 
+;;; TODO: Implement variants of for/min
+
 (provide for/max for*/max
          for/max+index for*/max+index)
 
