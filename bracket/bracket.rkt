@@ -785,8 +785,8 @@
     (values (map (curryr operand 0) (operands t=r-List)) 
             (map (curryr operand 1) (operands t=r-List)))))
 
-(module mpl-graphics racket
-  (require "../graphics.rkt")
+(module bracket-graphics racket
+  (require "../graphics/graphics.rkt")
   
   (define-syntax (declare/provide-vars stx)
     (syntax-case stx ()
@@ -811,7 +811,7 @@
            (submod ".." expression)
            (submod ".." undefined)
            (submod ".." equation-expression)
-           (submod ".." mpl-graphics))
+           (submod ".." bracket-graphics))
   (provide ; (all-from-out (submod ".." symbolic-application))
            (rename-out [free-of Free-of]
                        [base Base]
@@ -820,7 +820,7 @@
                        [exponent Exponent]
                        [before? Before?]
                        [kind Kind])
-           (all-from-out (submod ".." mpl-graphics))
+           (all-from-out (submod ".." bracket-graphics))
            Operand
            Operands
            Hold
@@ -1179,7 +1179,7 @@
            `(Range ,imin ,imax ,di))]
       [args `(Range . ,args)]))
   
-  (require "../adaptive-plotting.rkt")
+  (require "../plotting/adaptive-plotting.rkt")
   
   (define-match-expander List: 
     (λ (stx)

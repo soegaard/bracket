@@ -15,16 +15,30 @@
       eof
       (with-syntax ([body (parse-expression 
                            src
-                           #'from-my-read-syntax in)])
+                           #'from-my-read-syntax in)]
+                    [bracket-lang
+                     (let ()
+                       (define-values (base file _)
+                         (split-path
+                          (resolved-module-path-name
+                           (module-path-index-resolve
+                            (syntax-source-module #'here)))))
+                       (build-path base "../bracket-lang.rkt"))]
+                    [bracket.rkt
+                     (let ()
+                       (define-values (base file _)
+                         (split-path
+                          (resolved-module-path-name
+                           (module-path-index-resolve
+                            (syntax-source-module #'here)))))
+                       (build-path base "../bracket.rkt"))])
         (syntax-property 
          (strip-context   
-          #'(module anything "../main.rkt"
+          #'(module anything bracket-lang
+              (require (submod bracket.rkt bracket)
+                       (submod bracket.rkt symbolic-application))
               (define-syntax (#%infix stx)
-                ;(displayln (list 'my-read-syntax: stx))
-                (syntax-case stx ()
-                  [(_ expr) #'expr]))              
-              (require (submod "bracket.rkt" bracket)
-                       (submod "bracket.rkt" symbolic-application))
+                (syntax-case stx () [(_ expr) #'expr]))              
               ; This lists the operators used by the parser.
               (define expt Power)
               (define + Plus)
