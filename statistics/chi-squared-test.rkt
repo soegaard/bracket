@@ -1,4 +1,9 @@
 #lang racket
+;;;
+;;; This module implements Chi-squared tests for goodness of fit and
+;;; independence of categories.
+;;;
+
 (require racket/flonum
          (planet williams/science:4:5/science)
          (only-in (planet williams/science/unsafe-ops-utils)

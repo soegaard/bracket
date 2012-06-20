@@ -3,6 +3,7 @@
 (module common racket/base
   (provide curly?)
   (define (curly? stx)
+    ; Was the form in stx written with curly parentheses?    
     (let ([p (syntax-property stx 'paren-shape)])
       (and p 
            (or (eqv? p #\{)
