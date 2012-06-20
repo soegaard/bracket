@@ -1,0 +1,1564 @@
+0	g330962	=	(g330963)
+1	g330963	=	(start newline)
+2	g330963	=	(start EOF)
+3	start	=	(exp)
+4	start	=	()
+5	args	=	(exp)
+6	args	=	(exp COMMA args)
+7	args	=	()
+8	ids	=	()
+9	ids	=	(IDENTIFIER ids)
+10	parenthensis-exp	=	(OP exp CP)
+11	atom	=	(NUMBER)
+12	atom	=	(IDENTIFIER)
+13	atom	=	(STRING)
+14	atom	=	(parenthensis-exp)
+15	construction-exp	=	(OC args CC)
+16	construction-exp	=	(OP LAMBDA ids PERIOD exp CP)
+17	construction-exp	=	(atom)
+18	application-exp	=	(IDENTIFIEROP args CP)
+19	application-exp	=	(application-exp OP args CP)
+20	application-exp	=	(application-exp ODB exp CB CB)
+21	application-exp	=	(construction-exp)
+22	power-exp	=	(application-exp ^ power-exp)
+23	power-exp	=	(application-exp)
+24	sqrt-exp	=	(SQRT sqrt-exp)
+25	sqrt-exp	=	(power-exp)
+26	negation-exp	=	(- negation-exp)
+27	negation-exp	=	(sqrt-exp)
+28	multiplication-exp	=	(multiplication-exp * negation-exp)
+29	multiplication-exp	=	(multiplication-exp / negation-exp)
+30	multiplication-exp	=	(negation-exp)
+31	addition-exp	=	(addition-exp - multiplication-exp)
+32	addition-exp	=	(addition-exp + multiplication-exp)
+33	addition-exp	=	(multiplication-exp)
+34	order-exp	=	(addition-exp LESS-EQUAL addition-exp)
+35	order-exp	=	(addition-exp < addition-exp)
+36	order-exp	=	(addition-exp GREATER-EQUAL addition-exp)
+37	order-exp	=	(addition-exp > addition-exp)
+38	order-exp	=	(addition-exp NOT-EQUAL addition-exp)
+39	order-exp	=	(addition-exp = addition-exp)
+40	order-exp	=	(addition-exp)
+41	logical-negation-exp	=	(NEG logical-negation-exp)
+42	logical-negation-exp	=	(order-exp)
+43	assignment-exp	=	(IDENTIFIER:= assignment-exp)
+44	assignment-exp	=	(IDENTIFIEROP args CP := assignment-exp)
+45	assignment-exp	=	(logical-negation-exp)
+46	compound-exp	=	(compound-exp SEMI assignment-exp)
+47	compound-exp	=	(assignment-exp)
+48	exp	=	(compound-exp)
+State 0
+	g330962 -> . g330963 
+
+	negation-exp					goto	9
+	addition-exp					goto	11
+	NUMBER					shift	17
+	IDENTIFIER					shift	19
+	compound-exp					goto	15
+	SQRT					shift	24
+	newline					reduce	4
+	logical-negation-exp					goto	13
+	NEG					shift	25
+	IDENTIFIER:=					shift	21
+	EOF					reduce	4
+	IDENTIFIEROP					shift	20
+	parenthensis-exp					goto	3
+	assignment-exp					goto	14
+	STRING					shift	18
+	order-exp					goto	12
+	atom					goto	4
+	multiplication-exp					goto	10
+	OC					shift	23
+	application-exp					goto	6
+	sqrt-exp					goto	8
+	g330963					goto	1
+	-					shift	26
+	exp					goto	16
+	construction-exp					goto	5
+	OP					shift	22
+	power-exp					goto	7
+	start					goto	2
+
+State 1
+	g330962 -> g330963 . 
+
+
+State 2
+	g330963 -> start . newline 
+	g330963 -> start . EOF 
+
+	EOF					accept	
+	newline					accept	
+
+State 3
+	atom -> parenthensis-exp . 
+
+	GREATER-EQUAL					reduce	14
+	LESS-EQUAL					reduce	14
+	OP					reduce	14
+	+					reduce	14
+	NOT-EQUAL					reduce	14
+	^					reduce	14
+	*					reduce	14
+	CP					reduce	14
+	>					reduce	14
+	<					reduce	14
+	ODB					reduce	14
+	=					reduce	14
+	COMMA					reduce	14
+	newline					reduce	14
+	SEMI					reduce	14
+	-					reduce	14
+	EOF					reduce	14
+	CB					reduce	14
+	CC					reduce	14
+	/					reduce	14
+
+State 4
+	construction-exp -> atom . 
+
+	GREATER-EQUAL					reduce	17
+	LESS-EQUAL					reduce	17
+	OP					reduce	17
+	+					reduce	17
+	NOT-EQUAL					reduce	17
+	^					reduce	17
+	*					reduce	17
+	CP					reduce	17
+	>					reduce	17
+	<					reduce	17
+	ODB					reduce	17
+	=					reduce	17
+	COMMA					reduce	17
+	newline					reduce	17
+	SEMI					reduce	17
+	-					reduce	17
+	EOF					reduce	17
+	CB					reduce	17
+	CC					reduce	17
+	/					reduce	17
+
+State 5
+	application-exp -> construction-exp . 
+
+	GREATER-EQUAL					reduce	21
+	LESS-EQUAL					reduce	21
+	OP					reduce	21
+	+					reduce	21
+	NOT-EQUAL					reduce	21
+	^					reduce	21
+	*					reduce	21
+	CP					reduce	21
+	>					reduce	21
+	<					reduce	21
+	ODB					reduce	21
+	=					reduce	21
+	COMMA					reduce	21
+	newline					reduce	21
+	SEMI					reduce	21
+	-					reduce	21
+	EOF					reduce	21
+	CB					reduce	21
+	CC					reduce	21
+	/					reduce	21
+
+State 6
+	application-exp -> application-exp . OP args CP 
+	application-exp -> application-exp . ODB exp CB CB 
+	power-exp -> application-exp . ^ power-exp 
+	power-exp -> application-exp . 
+
+	GREATER-EQUAL					reduce	23
+	NOT-EQUAL					reduce	23
+	LESS-EQUAL					reduce	23
+	+					reduce	23
+	*					reduce	23
+	CB					reduce	23
+	^					shift	31
+	CP					reduce	23
+	>					reduce	23
+	<					reduce	23
+	ODB					shift	30
+	=					reduce	23
+	COMMA					reduce	23
+	newline					reduce	23
+	SEMI					reduce	23
+	-					reduce	23
+	EOF					reduce	23
+	OP					shift	29
+	CC					reduce	23
+	/					reduce	23
+
+State 7
+	sqrt-exp -> power-exp . 
+
+	GREATER-EQUAL					reduce	25
+	NOT-EQUAL					reduce	25
+	LESS-EQUAL					reduce	25
+	+					reduce	25
+	*					reduce	25
+	CB					reduce	25
+	CP					reduce	25
+	>					reduce	25
+	<					reduce	25
+	=					reduce	25
+	COMMA					reduce	25
+	newline					reduce	25
+	SEMI					reduce	25
+	-					reduce	25
+	EOF					reduce	25
+	CC					reduce	25
+	/					reduce	25
+
+State 8
+	negation-exp -> sqrt-exp . 
+
+	GREATER-EQUAL					reduce	27
+	NOT-EQUAL					reduce	27
+	LESS-EQUAL					reduce	27
+	+					reduce	27
+	*					reduce	27
+	CB					reduce	27
+	CP					reduce	27
+	>					reduce	27
+	<					reduce	27
+	=					reduce	27
+	COMMA					reduce	27
+	newline					reduce	27
+	SEMI					reduce	27
+	-					reduce	27
+	EOF					reduce	27
+	CC					reduce	27
+	/					reduce	27
+
+State 9
+	multiplication-exp -> negation-exp . 
+
+	GREATER-EQUAL					reduce	30
+	NOT-EQUAL					reduce	30
+	LESS-EQUAL					reduce	30
+	+					reduce	30
+	*					reduce	30
+	CB					reduce	30
+	CP					reduce	30
+	>					reduce	30
+	<					reduce	30
+	=					reduce	30
+	COMMA					reduce	30
+	newline					reduce	30
+	SEMI					reduce	30
+	-					reduce	30
+	EOF					reduce	30
+	CC					reduce	30
+	/					reduce	30
+
+State 10
+	multiplication-exp -> multiplication-exp . * negation-exp 
+	multiplication-exp -> multiplication-exp . / negation-exp 
+	addition-exp -> multiplication-exp . 
+
+	GREATER-EQUAL					reduce	33
+	LESS-EQUAL					reduce	33
+	+					reduce	33
+	*					shift	32
+	CB					reduce	33
+	/					shift	33
+	CP					reduce	33
+	>					reduce	33
+	<					reduce	33
+	=					reduce	33
+	COMMA					reduce	33
+	newline					reduce	33
+	SEMI					reduce	33
+	-					reduce	33
+	EOF					reduce	33
+	CC					reduce	33
+	NOT-EQUAL					reduce	33
+
+State 11
+	addition-exp -> addition-exp . - multiplication-exp 
+	addition-exp -> addition-exp . + multiplication-exp 
+	order-exp -> addition-exp . LESS-EQUAL addition-exp 
+	order-exp -> addition-exp . < addition-exp 
+	order-exp -> addition-exp . GREATER-EQUAL addition-exp 
+	order-exp -> addition-exp . > addition-exp 
+	order-exp -> addition-exp . NOT-EQUAL addition-exp 
+	order-exp -> addition-exp . = addition-exp 
+	order-exp -> addition-exp . 
+
+	GREATER-EQUAL					shift	35
+	LESS-EQUAL					shift	34
+	+					shift	40
+	CP					reduce	40
+	>					shift	39
+	COMMA					reduce	40
+	=					shift	37
+	SEMI					reduce	40
+	newline					reduce	40
+	CB					reduce	40
+	-					shift	41
+	<					shift	38
+	EOF					reduce	40
+	CC					reduce	40
+	NOT-EQUAL					shift	36
+
+State 12
+	logical-negation-exp -> order-exp . 
+
+	CP					reduce	42
+	SEMI					reduce	42
+	COMMA					reduce	42
+	newline					reduce	42
+	CB					reduce	42
+	EOF					reduce	42
+	CC					reduce	42
+
+State 13
+	assignment-exp -> logical-negation-exp . 
+
+	CP					reduce	45
+	SEMI					reduce	45
+	COMMA					reduce	45
+	newline					reduce	45
+	CB					reduce	45
+	EOF					reduce	45
+	CC					reduce	45
+
+State 14
+	compound-exp -> assignment-exp . 
+
+	CP					reduce	47
+	SEMI					reduce	47
+	COMMA					reduce	47
+	newline					reduce	47
+	CB					reduce	47
+	EOF					reduce	47
+	CC					reduce	47
+
+State 15
+	compound-exp -> compound-exp . SEMI assignment-exp 
+	exp -> compound-exp . 
+
+	COMMA					reduce	48
+	CP					reduce	48
+	SEMI					shift	42
+	newline					reduce	48
+	CB					reduce	48
+	EOF					reduce	48
+	CC					reduce	48
+
+State 16
+	start -> exp . 
+
+	EOF					reduce	3
+	newline					reduce	3
+
+State 17
+	atom -> NUMBER . 
+
+	GREATER-EQUAL					reduce	11
+	LESS-EQUAL					reduce	11
+	OP					reduce	11
+	+					reduce	11
+	NOT-EQUAL					reduce	11
+	^					reduce	11
+	*					reduce	11
+	CP					reduce	11
+	>					reduce	11
+	<					reduce	11
+	ODB					reduce	11
+	=					reduce	11
+	COMMA					reduce	11
+	newline					reduce	11
+	SEMI					reduce	11
+	-					reduce	11
+	EOF					reduce	11
+	CB					reduce	11
+	CC					reduce	11
+	/					reduce	11
+
+State 18
+	atom -> STRING . 
+
+	GREATER-EQUAL					reduce	13
+	LESS-EQUAL					reduce	13
+	OP					reduce	13
+	+					reduce	13
+	NOT-EQUAL					reduce	13
+	^					reduce	13
+	*					reduce	13
+	CP					reduce	13
+	>					reduce	13
+	<					reduce	13
+	ODB					reduce	13
+	=					reduce	13
+	COMMA					reduce	13
+	newline					reduce	13
+	SEMI					reduce	13
+	-					reduce	13
+	EOF					reduce	13
+	CB					reduce	13
+	CC					reduce	13
+	/					reduce	13
+
+State 19
+	atom -> IDENTIFIER . 
+
+	GREATER-EQUAL					reduce	12
+	LESS-EQUAL					reduce	12
+	OP					reduce	12
+	+					reduce	12
+	NOT-EQUAL					reduce	12
+	^					reduce	12
+	*					reduce	12
+	CP					reduce	12
+	>					reduce	12
+	<					reduce	12
+	ODB					reduce	12
+	=					reduce	12
+	COMMA					reduce	12
+	newline					reduce	12
+	SEMI					reduce	12
+	-					reduce	12
+	EOF					reduce	12
+	CB					reduce	12
+	CC					reduce	12
+	/					reduce	12
+
+State 20
+	application-exp -> IDENTIFIEROP . args CP 
+	assignment-exp -> IDENTIFIEROP . args CP := assignment-exp 
+
+	negation-exp					goto	9
+	addition-exp					goto	11
+	NUMBER					shift	17
+	IDENTIFIER					shift	19
+	compound-exp					goto	15
+	SQRT					shift	24
+	logical-negation-exp					goto	13
+	NEG					shift	25
+	IDENTIFIER:=					shift	21
+	IDENTIFIEROP					shift	20
+	parenthensis-exp					goto	3
+	assignment-exp					goto	14
+	STRING					shift	18
+	order-exp					goto	12
+	atom					goto	4
+	CP					reduce	7
+	multiplication-exp					goto	10
+	OC					shift	23
+	application-exp					goto	6
+	sqrt-exp					goto	8
+	args					goto	43
+	-					shift	26
+	exp					goto	44
+	construction-exp					goto	5
+	OP					shift	22
+	power-exp					goto	7
+
+State 21
+	assignment-exp -> IDENTIFIER:= . assignment-exp 
+
+	negation-exp					goto	9
+	addition-exp					goto	11
+	parenthensis-exp					goto	3
+	assignment-exp					goto	45
+	STRING					shift	18
+	IDENTIFIER:=					shift	21
+	order-exp					goto	12
+	atom					goto	4
+	multiplication-exp					goto	10
+	NUMBER					shift	17
+	application-exp					goto	6
+	SQRT					shift	24
+	sqrt-exp					goto	8
+	OC					shift	23
+	NEG					shift	25
+	logical-negation-exp					goto	13
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	-					shift	26
+	OP					shift	22
+	power-exp					goto	7
+	IDENTIFIEROP					shift	20
+
+State 22
+	parenthensis-exp -> OP . exp CP 
+	construction-exp -> OP . LAMBDA ids PERIOD exp CP 
+
+	negation-exp					goto	9
+	addition-exp					goto	11
+	NUMBER					shift	17
+	LAMBDA					shift	47
+	compound-exp					goto	15
+	SQRT					shift	24
+	IDENTIFIER					shift	19
+	logical-negation-exp					goto	13
+	NEG					shift	25
+	IDENTIFIER:=					shift	21
+	IDENTIFIEROP					shift	20
+	parenthensis-exp					goto	3
+	assignment-exp					goto	14
+	STRING					shift	18
+	order-exp					goto	12
+	atom					goto	4
+	multiplication-exp					goto	10
+	OC					shift	23
+	application-exp					goto	6
+	sqrt-exp					goto	8
+	-					shift	26
+	exp					goto	46
+	construction-exp					goto	5
+	OP					shift	22
+	power-exp					goto	7
+
+State 23
+	construction-exp -> OC . args CC 
+
+	negation-exp					goto	9
+	addition-exp					goto	11
+	NUMBER					shift	17
+	IDENTIFIER					shift	19
+	compound-exp					goto	15
+	SQRT					shift	24
+	CC					reduce	7
+	logical-negation-exp					goto	13
+	NEG					shift	25
+	IDENTIFIER:=					shift	21
+	IDENTIFIEROP					shift	20
+	parenthensis-exp					goto	3
+	assignment-exp					goto	14
+	STRING					shift	18
+	order-exp					goto	12
+	atom					goto	4
+	multiplication-exp					goto	10
+	OC					shift	23
+	application-exp					goto	6
+	sqrt-exp					goto	8
+	args					goto	48
+	-					shift	26
+	exp					goto	44
+	construction-exp					goto	5
+	OP					shift	22
+	power-exp					goto	7
+
+State 24
+	sqrt-exp -> SQRT . sqrt-exp 
+
+	IDENTIFIEROP					shift	50
+	parenthensis-exp					goto	3
+	NUMBER					shift	17
+	STRING					shift	18
+	atom					goto	4
+	OC					shift	23
+	application-exp					goto	6
+	SQRT					shift	24
+	sqrt-exp					goto	49
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	OP					shift	22
+	power-exp					goto	7
+
+State 25
+	logical-negation-exp -> NEG . logical-negation-exp 
+
+	negation-exp					goto	9
+	addition-exp					goto	11
+	parenthensis-exp					goto	3
+	NUMBER					shift	17
+	STRING					shift	18
+	order-exp					goto	12
+	atom					goto	4
+	multiplication-exp					goto	10
+	OC					shift	23
+	application-exp					goto	6
+	SQRT					shift	24
+	sqrt-exp					goto	8
+	NEG					shift	25
+	logical-negation-exp					goto	51
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	-					shift	26
+	OP					shift	22
+	power-exp					goto	7
+	IDENTIFIEROP					shift	50
+
+State 26
+	negation-exp -> - . negation-exp 
+
+	negation-exp					goto	52
+	IDENTIFIEROP					shift	50
+	parenthensis-exp					goto	3
+	NUMBER					shift	17
+	STRING					shift	18
+	atom					goto	4
+	OC					shift	23
+	application-exp					goto	6
+	SQRT					shift	24
+	sqrt-exp					goto	8
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	-					shift	26
+	OP					shift	22
+	power-exp					goto	7
+
+State 27
+	g330963 -> start newline . 
+
+
+State 28
+	g330963 -> start EOF . 
+
+
+State 29
+	application-exp -> application-exp OP . args CP 
+
+	negation-exp					goto	9
+	addition-exp					goto	11
+	NUMBER					shift	17
+	IDENTIFIER					shift	19
+	compound-exp					goto	15
+	SQRT					shift	24
+	logical-negation-exp					goto	13
+	NEG					shift	25
+	IDENTIFIER:=					shift	21
+	IDENTIFIEROP					shift	20
+	parenthensis-exp					goto	3
+	assignment-exp					goto	14
+	STRING					shift	18
+	order-exp					goto	12
+	atom					goto	4
+	CP					reduce	7
+	multiplication-exp					goto	10
+	OC					shift	23
+	application-exp					goto	6
+	sqrt-exp					goto	8
+	args					goto	53
+	-					shift	26
+	exp					goto	44
+	construction-exp					goto	5
+	OP					shift	22
+	power-exp					goto	7
+
+State 30
+	application-exp -> application-exp ODB . exp CB CB 
+
+	negation-exp					goto	9
+	addition-exp					goto	11
+	NUMBER					shift	17
+	IDENTIFIER					shift	19
+	compound-exp					goto	15
+	SQRT					shift	24
+	logical-negation-exp					goto	13
+	NEG					shift	25
+	IDENTIFIER:=					shift	21
+	IDENTIFIEROP					shift	20
+	parenthensis-exp					goto	3
+	assignment-exp					goto	14
+	STRING					shift	18
+	order-exp					goto	12
+	atom					goto	4
+	multiplication-exp					goto	10
+	OC					shift	23
+	application-exp					goto	6
+	sqrt-exp					goto	8
+	-					shift	26
+	exp					goto	54
+	construction-exp					goto	5
+	OP					shift	22
+	power-exp					goto	7
+
+State 31
+	power-exp -> application-exp ^ . power-exp 
+
+	OC					shift	23
+	IDENTIFIEROP					shift	50
+	parenthensis-exp					goto	3
+	NUMBER					shift	17
+	STRING					shift	18
+	application-exp					goto	6
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	atom					goto	4
+	OP					shift	22
+	power-exp					goto	55
+
+State 32
+	multiplication-exp -> multiplication-exp * . negation-exp 
+
+	negation-exp					goto	56
+	IDENTIFIEROP					shift	50
+	parenthensis-exp					goto	3
+	NUMBER					shift	17
+	STRING					shift	18
+	atom					goto	4
+	OC					shift	23
+	application-exp					goto	6
+	SQRT					shift	24
+	sqrt-exp					goto	8
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	-					shift	26
+	OP					shift	22
+	power-exp					goto	7
+
+State 33
+	multiplication-exp -> multiplication-exp / . negation-exp 
+
+	negation-exp					goto	57
+	IDENTIFIEROP					shift	50
+	parenthensis-exp					goto	3
+	NUMBER					shift	17
+	STRING					shift	18
+	atom					goto	4
+	OC					shift	23
+	application-exp					goto	6
+	SQRT					shift	24
+	sqrt-exp					goto	8
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	-					shift	26
+	OP					shift	22
+	power-exp					goto	7
+
+State 34
+	order-exp -> addition-exp LESS-EQUAL . addition-exp 
+
+	negation-exp					goto	9
+	addition-exp					goto	58
+	parenthensis-exp					goto	3
+	NUMBER					shift	17
+	STRING					shift	18
+	atom					goto	4
+	multiplication-exp					goto	10
+	OC					shift	23
+	application-exp					goto	6
+	SQRT					shift	24
+	sqrt-exp					goto	8
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	-					shift	26
+	OP					shift	22
+	power-exp					goto	7
+	IDENTIFIEROP					shift	50
+
+State 35
+	order-exp -> addition-exp GREATER-EQUAL . addition-exp 
+
+	negation-exp					goto	9
+	addition-exp					goto	59
+	parenthensis-exp					goto	3
+	NUMBER					shift	17
+	STRING					shift	18
+	atom					goto	4
+	multiplication-exp					goto	10
+	OC					shift	23
+	application-exp					goto	6
+	SQRT					shift	24
+	sqrt-exp					goto	8
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	-					shift	26
+	OP					shift	22
+	power-exp					goto	7
+	IDENTIFIEROP					shift	50
+
+State 36
+	order-exp -> addition-exp NOT-EQUAL . addition-exp 
+
+	negation-exp					goto	9
+	addition-exp					goto	60
+	parenthensis-exp					goto	3
+	NUMBER					shift	17
+	STRING					shift	18
+	atom					goto	4
+	multiplication-exp					goto	10
+	OC					shift	23
+	application-exp					goto	6
+	SQRT					shift	24
+	sqrt-exp					goto	8
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	-					shift	26
+	OP					shift	22
+	power-exp					goto	7
+	IDENTIFIEROP					shift	50
+
+State 37
+	order-exp -> addition-exp = . addition-exp 
+
+	negation-exp					goto	9
+	addition-exp					goto	61
+	parenthensis-exp					goto	3
+	NUMBER					shift	17
+	STRING					shift	18
+	atom					goto	4
+	multiplication-exp					goto	10
+	OC					shift	23
+	application-exp					goto	6
+	SQRT					shift	24
+	sqrt-exp					goto	8
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	-					shift	26
+	OP					shift	22
+	power-exp					goto	7
+	IDENTIFIEROP					shift	50
+
+State 38
+	order-exp -> addition-exp < . addition-exp 
+
+	negation-exp					goto	9
+	addition-exp					goto	62
+	parenthensis-exp					goto	3
+	NUMBER					shift	17
+	STRING					shift	18
+	atom					goto	4
+	multiplication-exp					goto	10
+	OC					shift	23
+	application-exp					goto	6
+	SQRT					shift	24
+	sqrt-exp					goto	8
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	-					shift	26
+	OP					shift	22
+	power-exp					goto	7
+	IDENTIFIEROP					shift	50
+
+State 39
+	order-exp -> addition-exp > . addition-exp 
+
+	negation-exp					goto	9
+	addition-exp					goto	63
+	parenthensis-exp					goto	3
+	NUMBER					shift	17
+	STRING					shift	18
+	atom					goto	4
+	multiplication-exp					goto	10
+	OC					shift	23
+	application-exp					goto	6
+	SQRT					shift	24
+	sqrt-exp					goto	8
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	-					shift	26
+	OP					shift	22
+	power-exp					goto	7
+	IDENTIFIEROP					shift	50
+
+State 40
+	addition-exp -> addition-exp + . multiplication-exp 
+
+	negation-exp					goto	9
+	IDENTIFIEROP					shift	50
+	parenthensis-exp					goto	3
+	NUMBER					shift	17
+	STRING					shift	18
+	atom					goto	4
+	multiplication-exp					goto	64
+	OC					shift	23
+	application-exp					goto	6
+	SQRT					shift	24
+	sqrt-exp					goto	8
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	-					shift	26
+	OP					shift	22
+	power-exp					goto	7
+
+State 41
+	addition-exp -> addition-exp - . multiplication-exp 
+
+	negation-exp					goto	9
+	IDENTIFIEROP					shift	50
+	parenthensis-exp					goto	3
+	NUMBER					shift	17
+	STRING					shift	18
+	atom					goto	4
+	multiplication-exp					goto	65
+	OC					shift	23
+	application-exp					goto	6
+	SQRT					shift	24
+	sqrt-exp					goto	8
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	-					shift	26
+	OP					shift	22
+	power-exp					goto	7
+
+State 42
+	compound-exp -> compound-exp SEMI . assignment-exp 
+
+	negation-exp					goto	9
+	addition-exp					goto	11
+	parenthensis-exp					goto	3
+	assignment-exp					goto	66
+	STRING					shift	18
+	IDENTIFIER:=					shift	21
+	order-exp					goto	12
+	atom					goto	4
+	multiplication-exp					goto	10
+	NUMBER					shift	17
+	application-exp					goto	6
+	SQRT					shift	24
+	sqrt-exp					goto	8
+	OC					shift	23
+	NEG					shift	25
+	logical-negation-exp					goto	13
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	-					shift	26
+	OP					shift	22
+	power-exp					goto	7
+	IDENTIFIEROP					shift	20
+
+State 43
+	application-exp -> IDENTIFIEROP args . CP 
+	assignment-exp -> IDENTIFIEROP args . CP := assignment-exp 
+
+	CP					shift	67
+
+State 44
+	args -> exp . 
+	args -> exp . COMMA args 
+
+	CP					reduce	5
+	COMMA					shift	68
+	CC					reduce	5
+
+State 45
+	assignment-exp -> IDENTIFIER:= assignment-exp . 
+
+	CP					reduce	43
+	SEMI					reduce	43
+	COMMA					reduce	43
+	newline					reduce	43
+	CB					reduce	43
+	EOF					reduce	43
+	CC					reduce	43
+
+State 46
+	parenthensis-exp -> OP exp . CP 
+
+	CP					shift	69
+
+State 47
+	construction-exp -> OP LAMBDA . ids PERIOD exp CP 
+
+	ids					goto	70
+	IDENTIFIER					shift	71
+	PERIOD					reduce	8
+
+State 48
+	construction-exp -> OC args . CC 
+
+	CC					shift	72
+
+State 49
+	sqrt-exp -> SQRT sqrt-exp . 
+
+	GREATER-EQUAL					reduce	24
+	NOT-EQUAL					reduce	24
+	LESS-EQUAL					reduce	24
+	+					reduce	24
+	*					reduce	24
+	CB					reduce	24
+	CP					reduce	24
+	>					reduce	24
+	<					reduce	24
+	=					reduce	24
+	COMMA					reduce	24
+	newline					reduce	24
+	SEMI					reduce	24
+	-					reduce	24
+	EOF					reduce	24
+	CC					reduce	24
+	/					reduce	24
+
+State 50
+	application-exp -> IDENTIFIEROP . args CP 
+
+	negation-exp					goto	9
+	addition-exp					goto	11
+	NUMBER					shift	17
+	IDENTIFIER					shift	19
+	compound-exp					goto	15
+	SQRT					shift	24
+	logical-negation-exp					goto	13
+	NEG					shift	25
+	IDENTIFIER:=					shift	21
+	IDENTIFIEROP					shift	20
+	parenthensis-exp					goto	3
+	assignment-exp					goto	14
+	STRING					shift	18
+	order-exp					goto	12
+	atom					goto	4
+	CP					reduce	7
+	multiplication-exp					goto	10
+	OC					shift	23
+	application-exp					goto	6
+	sqrt-exp					goto	8
+	args					goto	73
+	-					shift	26
+	exp					goto	44
+	construction-exp					goto	5
+	OP					shift	22
+	power-exp					goto	7
+
+State 51
+	logical-negation-exp -> NEG logical-negation-exp . 
+
+	CP					reduce	41
+	SEMI					reduce	41
+	COMMA					reduce	41
+	newline					reduce	41
+	CB					reduce	41
+	EOF					reduce	41
+	CC					reduce	41
+
+State 52
+	negation-exp -> - negation-exp . 
+
+	GREATER-EQUAL					reduce	26
+	NOT-EQUAL					reduce	26
+	LESS-EQUAL					reduce	26
+	+					reduce	26
+	*					reduce	26
+	CB					reduce	26
+	CP					reduce	26
+	>					reduce	26
+	<					reduce	26
+	=					reduce	26
+	COMMA					reduce	26
+	newline					reduce	26
+	SEMI					reduce	26
+	-					reduce	26
+	EOF					reduce	26
+	CC					reduce	26
+	/					reduce	26
+
+State 53
+	application-exp -> application-exp OP args . CP 
+
+	CP					shift	74
+
+State 54
+	application-exp -> application-exp ODB exp . CB CB 
+
+	CB					shift	75
+
+State 55
+	power-exp -> application-exp ^ power-exp . 
+
+	GREATER-EQUAL					reduce	22
+	NOT-EQUAL					reduce	22
+	LESS-EQUAL					reduce	22
+	+					reduce	22
+	*					reduce	22
+	CB					reduce	22
+	CP					reduce	22
+	>					reduce	22
+	<					reduce	22
+	=					reduce	22
+	COMMA					reduce	22
+	newline					reduce	22
+	SEMI					reduce	22
+	-					reduce	22
+	EOF					reduce	22
+	CC					reduce	22
+	/					reduce	22
+
+State 56
+	multiplication-exp -> multiplication-exp * negation-exp . 
+
+	GREATER-EQUAL					reduce	28
+	NOT-EQUAL					reduce	28
+	LESS-EQUAL					reduce	28
+	+					reduce	28
+	*					reduce	28
+	CB					reduce	28
+	CP					reduce	28
+	>					reduce	28
+	<					reduce	28
+	=					reduce	28
+	COMMA					reduce	28
+	newline					reduce	28
+	SEMI					reduce	28
+	-					reduce	28
+	EOF					reduce	28
+	CC					reduce	28
+	/					reduce	28
+
+State 57
+	multiplication-exp -> multiplication-exp / negation-exp . 
+
+	GREATER-EQUAL					reduce	29
+	NOT-EQUAL					reduce	29
+	LESS-EQUAL					reduce	29
+	+					reduce	29
+	*					reduce	29
+	CB					reduce	29
+	CP					reduce	29
+	>					reduce	29
+	<					reduce	29
+	=					reduce	29
+	COMMA					reduce	29
+	newline					reduce	29
+	SEMI					reduce	29
+	-					reduce	29
+	EOF					reduce	29
+	CC					reduce	29
+	/					reduce	29
+
+State 58
+	addition-exp -> addition-exp . - multiplication-exp 
+	addition-exp -> addition-exp . + multiplication-exp 
+	order-exp -> addition-exp LESS-EQUAL addition-exp . 
+
+	CP					reduce	34
+	SEMI					reduce	34
+	+					shift	40
+	COMMA					reduce	34
+	newline					reduce	34
+	CB					reduce	34
+	-					shift	41
+	EOF					reduce	34
+	CC					reduce	34
+
+State 59
+	addition-exp -> addition-exp . - multiplication-exp 
+	addition-exp -> addition-exp . + multiplication-exp 
+	order-exp -> addition-exp GREATER-EQUAL addition-exp . 
+
+	CP					reduce	36
+	SEMI					reduce	36
+	+					shift	40
+	COMMA					reduce	36
+	newline					reduce	36
+	CB					reduce	36
+	-					shift	41
+	EOF					reduce	36
+	CC					reduce	36
+
+State 60
+	addition-exp -> addition-exp . - multiplication-exp 
+	addition-exp -> addition-exp . + multiplication-exp 
+	order-exp -> addition-exp NOT-EQUAL addition-exp . 
+
+	CP					reduce	38
+	SEMI					reduce	38
+	+					shift	40
+	COMMA					reduce	38
+	newline					reduce	38
+	CB					reduce	38
+	-					shift	41
+	EOF					reduce	38
+	CC					reduce	38
+
+State 61
+	addition-exp -> addition-exp . - multiplication-exp 
+	addition-exp -> addition-exp . + multiplication-exp 
+	order-exp -> addition-exp = addition-exp . 
+
+	CP					reduce	39
+	SEMI					reduce	39
+	+					shift	40
+	COMMA					reduce	39
+	newline					reduce	39
+	CB					reduce	39
+	-					shift	41
+	EOF					reduce	39
+	CC					reduce	39
+
+State 62
+	addition-exp -> addition-exp . - multiplication-exp 
+	addition-exp -> addition-exp . + multiplication-exp 
+	order-exp -> addition-exp < addition-exp . 
+
+	CP					reduce	35
+	SEMI					reduce	35
+	+					shift	40
+	COMMA					reduce	35
+	newline					reduce	35
+	CB					reduce	35
+	-					shift	41
+	EOF					reduce	35
+	CC					reduce	35
+
+State 63
+	addition-exp -> addition-exp . - multiplication-exp 
+	addition-exp -> addition-exp . + multiplication-exp 
+	order-exp -> addition-exp > addition-exp . 
+
+	CP					reduce	37
+	SEMI					reduce	37
+	+					shift	40
+	COMMA					reduce	37
+	newline					reduce	37
+	CB					reduce	37
+	-					shift	41
+	EOF					reduce	37
+	CC					reduce	37
+
+State 64
+	multiplication-exp -> multiplication-exp . * negation-exp 
+	multiplication-exp -> multiplication-exp . / negation-exp 
+	addition-exp -> addition-exp + multiplication-exp . 
+
+	GREATER-EQUAL					reduce	32
+	LESS-EQUAL					reduce	32
+	+					reduce	32
+	*					shift	32
+	CB					reduce	32
+	/					shift	33
+	CP					reduce	32
+	>					reduce	32
+	<					reduce	32
+	=					reduce	32
+	COMMA					reduce	32
+	newline					reduce	32
+	SEMI					reduce	32
+	-					reduce	32
+	EOF					reduce	32
+	CC					reduce	32
+	NOT-EQUAL					reduce	32
+
+State 65
+	multiplication-exp -> multiplication-exp . * negation-exp 
+	multiplication-exp -> multiplication-exp . / negation-exp 
+	addition-exp -> addition-exp - multiplication-exp . 
+
+	GREATER-EQUAL					reduce	31
+	LESS-EQUAL					reduce	31
+	+					reduce	31
+	*					shift	32
+	CB					reduce	31
+	/					shift	33
+	CP					reduce	31
+	>					reduce	31
+	<					reduce	31
+	=					reduce	31
+	COMMA					reduce	31
+	newline					reduce	31
+	SEMI					reduce	31
+	-					reduce	31
+	EOF					reduce	31
+	CC					reduce	31
+	NOT-EQUAL					reduce	31
+
+State 66
+	compound-exp -> compound-exp SEMI assignment-exp . 
+
+	CP					reduce	46
+	SEMI					reduce	46
+	COMMA					reduce	46
+	newline					reduce	46
+	CB					reduce	46
+	EOF					reduce	46
+	CC					reduce	46
+
+State 67
+	application-exp -> IDENTIFIEROP args CP . 
+	assignment-exp -> IDENTIFIEROP args CP . := assignment-exp 
+
+	GREATER-EQUAL					reduce	18
+	LESS-EQUAL					reduce	18
+	OP					reduce	18
+	+					reduce	18
+	NOT-EQUAL					reduce	18
+	^					reduce	18
+	*					reduce	18
+	:=					shift	76
+	CP					reduce	18
+	>					reduce	18
+	<					reduce	18
+	ODB					reduce	18
+	=					reduce	18
+	COMMA					reduce	18
+	newline					reduce	18
+	SEMI					reduce	18
+	-					reduce	18
+	EOF					reduce	18
+	CB					reduce	18
+	CC					reduce	18
+	/					reduce	18
+
+State 68
+	args -> exp COMMA . args 
+
+	negation-exp					goto	9
+	addition-exp					goto	11
+	NUMBER					shift	17
+	IDENTIFIER					shift	19
+	compound-exp					goto	15
+	IDENTIFIEROP					shift	20
+	SQRT					shift	24
+	CC					reduce	7
+	logical-negation-exp					goto	13
+	NEG					shift	25
+	IDENTIFIER:=					shift	21
+	args					goto	77
+	parenthensis-exp					goto	3
+	assignment-exp					goto	14
+	STRING					shift	18
+	order-exp					goto	12
+	atom					goto	4
+	CP					reduce	7
+	multiplication-exp					goto	10
+	OC					shift	23
+	application-exp					goto	6
+	sqrt-exp					goto	8
+	-					shift	26
+	exp					goto	44
+	construction-exp					goto	5
+	OP					shift	22
+	power-exp					goto	7
+
+State 69
+	parenthensis-exp -> OP exp CP . 
+
+	GREATER-EQUAL					reduce	10
+	LESS-EQUAL					reduce	10
+	OP					reduce	10
+	+					reduce	10
+	NOT-EQUAL					reduce	10
+	^					reduce	10
+	*					reduce	10
+	CP					reduce	10
+	>					reduce	10
+	<					reduce	10
+	ODB					reduce	10
+	=					reduce	10
+	COMMA					reduce	10
+	newline					reduce	10
+	SEMI					reduce	10
+	-					reduce	10
+	EOF					reduce	10
+	CB					reduce	10
+	CC					reduce	10
+	/					reduce	10
+
+State 70
+	construction-exp -> OP LAMBDA ids . PERIOD exp CP 
+
+	PERIOD					shift	78
+
+State 71
+	ids -> IDENTIFIER . ids 
+
+	ids					goto	79
+	IDENTIFIER					shift	71
+	PERIOD					reduce	8
+
+State 72
+	construction-exp -> OC args CC . 
+
+	GREATER-EQUAL					reduce	15
+	LESS-EQUAL					reduce	15
+	OP					reduce	15
+	+					reduce	15
+	NOT-EQUAL					reduce	15
+	^					reduce	15
+	*					reduce	15
+	CP					reduce	15
+	>					reduce	15
+	<					reduce	15
+	ODB					reduce	15
+	=					reduce	15
+	COMMA					reduce	15
+	newline					reduce	15
+	SEMI					reduce	15
+	-					reduce	15
+	EOF					reduce	15
+	CB					reduce	15
+	CC					reduce	15
+	/					reduce	15
+
+State 73
+	application-exp -> IDENTIFIEROP args . CP 
+
+	CP					shift	80
+
+State 74
+	application-exp -> application-exp OP args CP . 
+
+	GREATER-EQUAL					reduce	19
+	LESS-EQUAL					reduce	19
+	OP					reduce	19
+	+					reduce	19
+	NOT-EQUAL					reduce	19
+	^					reduce	19
+	*					reduce	19
+	CP					reduce	19
+	>					reduce	19
+	<					reduce	19
+	ODB					reduce	19
+	=					reduce	19
+	COMMA					reduce	19
+	newline					reduce	19
+	SEMI					reduce	19
+	-					reduce	19
+	EOF					reduce	19
+	CB					reduce	19
+	CC					reduce	19
+	/					reduce	19
+
+State 75
+	application-exp -> application-exp ODB exp CB . CB 
+
+	CB					shift	81
+
+State 76
+	assignment-exp -> IDENTIFIEROP args CP := . assignment-exp 
+
+	negation-exp					goto	9
+	addition-exp					goto	11
+	parenthensis-exp					goto	3
+	assignment-exp					goto	82
+	STRING					shift	18
+	IDENTIFIER:=					shift	21
+	order-exp					goto	12
+	atom					goto	4
+	multiplication-exp					goto	10
+	NUMBER					shift	17
+	application-exp					goto	6
+	SQRT					shift	24
+	sqrt-exp					goto	8
+	OC					shift	23
+	NEG					shift	25
+	logical-negation-exp					goto	13
+	IDENTIFIER					shift	19
+	construction-exp					goto	5
+	-					shift	26
+	OP					shift	22
+	power-exp					goto	7
+	IDENTIFIEROP					shift	20
+
+State 77
+	args -> exp COMMA args . 
+
+	CP					reduce	6
+	CC					reduce	6
+
+State 78
+	construction-exp -> OP LAMBDA ids PERIOD . exp CP 
+
+	negation-exp					goto	9
+	addition-exp					goto	11
+	NUMBER					shift	17
+	IDENTIFIER					shift	19
+	compound-exp					goto	15
+	SQRT					shift	24
+	logical-negation-exp					goto	13
+	NEG					shift	25
+	IDENTIFIER:=					shift	21
+	IDENTIFIEROP					shift	20
+	parenthensis-exp					goto	3
+	assignment-exp					goto	14
+	STRING					shift	18
+	order-exp					goto	12
+	atom					goto	4
+	multiplication-exp					goto	10
+	OC					shift	23
+	application-exp					goto	6
+	sqrt-exp					goto	8
+	-					shift	26
+	exp					goto	83
+	construction-exp					goto	5
+	OP					shift	22
+	power-exp					goto	7
+
+State 79
+	ids -> IDENTIFIER ids . 
+
+	PERIOD					reduce	9
+
+State 80
+	application-exp -> IDENTIFIEROP args CP . 
+
+	GREATER-EQUAL					reduce	18
+	LESS-EQUAL					reduce	18
+	OP					reduce	18
+	+					reduce	18
+	NOT-EQUAL					reduce	18
+	^					reduce	18
+	*					reduce	18
+	CP					reduce	18
+	>					reduce	18
+	<					reduce	18
+	ODB					reduce	18
+	=					reduce	18
+	COMMA					reduce	18
+	newline					reduce	18
+	SEMI					reduce	18
+	-					reduce	18
+	EOF					reduce	18
+	CB					reduce	18
+	CC					reduce	18
+	/					reduce	18
+
+State 81
+	application-exp -> application-exp ODB exp CB CB . 
+
+	GREATER-EQUAL					reduce	20
+	LESS-EQUAL					reduce	20
+	OP					reduce	20
+	+					reduce	20
+	NOT-EQUAL					reduce	20
+	^					reduce	20
+	*					reduce	20
+	CP					reduce	20
+	>					reduce	20
+	<					reduce	20
+	ODB					reduce	20
+	=					reduce	20
+	COMMA					reduce	20
+	newline					reduce	20
+	SEMI					reduce	20
+	-					reduce	20
+	EOF					reduce	20
+	CB					reduce	20
+	CC					reduce	20
+	/					reduce	20
+
+State 82
+	assignment-exp -> IDENTIFIEROP args CP := assignment-exp . 
+
+	CP					reduce	44
+	SEMI					reduce	44
+	COMMA					reduce	44
+	newline					reduce	44
+	CB					reduce	44
+	EOF					reduce	44
+	CC					reduce	44
+
+State 83
+	construction-exp -> OP LAMBDA ids PERIOD exp . CP 
+
+	CP					shift	84
+
+State 84
+	construction-exp -> OP LAMBDA ids PERIOD exp CP . 
+
+	GREATER-EQUAL					reduce	16
+	LESS-EQUAL					reduce	16
+	OP					reduce	16
+	+					reduce	16
+	NOT-EQUAL					reduce	16
+	^					reduce	16
+	*					reduce	16
+	CP					reduce	16
+	>					reduce	16
+	<					reduce	16
+	ODB					reduce	16
+	=					reduce	16
+	COMMA					reduce	16
+	newline					reduce	16
+	SEMI					reduce	16
+	-					reduce	16
+	EOF					reduce	16
+	CB					reduce	16
+	CC					reduce	16
+	/					reduce	16
+

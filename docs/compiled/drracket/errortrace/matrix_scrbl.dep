@@ -1,0 +1,1 @@
+("5.3.0.6" ("aae85b364fdad2d22792dcc703d47d1c2f80d03f" . "503a738d74e318a813236a43fae9d2155ee7c3c2") (collects #"scribble" #"manual" #"lang.rkt") #"/Users/soegaard/Dropbox/GitHub/racket-cas/docs/../math-scribble/math-scribble.rkt" (collects #"scribble" #"manual" #"lang" #"reader.rkt"))
