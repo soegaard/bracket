@@ -1,16 +1,16 @@
 #lang racket
 (provide (rename-out 
-          [my-read read]
-          [my-read-syntax read-syntax]))
+          [bracket-read read]
+          [bracket-read-syntax read-syntax]))
 
 (require "parser.rkt")
 (require syntax/strip-context)
 
-(define (my-read in)
+(define (bracket-read in)
   (syntax->datum
-   (my-read-syntax #'from-my-read in)))
+   (bracket-read-syntax #'from-my-read in)))
 
-(define (my-read-syntax src in)
+(define (bracket-read-syntax src in)
   (if (eof-object? (peek-byte in))
       eof
       (with-syntax ([body (parse-expression 
@@ -18,7 +18,7 @@
                            #'from-my-read-syntax in)])
         (syntax-property 
          (strip-context   
-          #'(module anything "bracket-lang.rkt"
+          #'(module anything "../main.rkt"
               (define-syntax (#%infix stx)
                 ;(displayln (list 'my-read-syntax: stx))
                 (syntax-case stx ()
@@ -48,4 +48,3 @@
        (dynamic-require 'syntax-color/default-lexer
                         'default-lexer)]
       [else default])))
-             
