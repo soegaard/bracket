@@ -25,3 +25,9 @@ norm(a);
 norm(b);
 proj(a,b);
 line({x0,y0},{z,w});
+x:=0;
+x=0;
+If(x=0,1,2);
+If(x=0,1,2);
+If(x=42,1,2);
+If(3+z,1,2)

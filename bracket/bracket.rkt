@@ -820,6 +820,7 @@
    Variables
    Map
    Apply
+   If
    Append
    AppendStar
    Sin Cos Tan Sqrt
@@ -849,6 +850,11 @@
     (construct 'List (operands u)))
   
   (define Hold 'Hold)
+  
+  (define (If t c a)
+    (if (atomic-expression? t)
+        (if t c a)
+        (construct 'If (list t c a))))
   
   (define (Plus . expressions)
     (simplify-plus expressions))
@@ -1331,7 +1337,12 @@
   (check-equal? (Expand (Power (Plus a b) 2))
                 (Plus (Power a 2) (Times 2 a b) (Power b 2)))
   (check-equal? (Expand (Times a (Plus x y)))
-                (Plus (Times a x) (Times a y))))
+                (Plus (Times a x) (Times a y)))  
+  ; If
+  (check-equal? (If (Equal 1 1) 2 3) 2)
+  (check-equal? (If (Equal 1 2) 2 3) 3)
+  (check-equal? (If (Equal 1 x) 2 3) '(If (Equal 1 x) 2 3))
+  )
 
 
 #;(require (submod "." symbolic-application)
