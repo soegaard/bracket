@@ -1,26 +1,5 @@
 #lang racket
 
-#;(module bracket-graphics racket
-  (require "../graphics/graphics.rkt")
-  
-  (define-syntax (declare/provide-vars stx)
-    (syntax-case stx ()
-      [(_ id ...)
-       #'(begin
-           (define id 'id) ...
-           (provide id) ...)]))
-  
-  (provide Graphics)
-  
-  (declare/provide-vars
-   Blend Darker Hue Lighter
-   Circle Disk Line Point Rectangle
-   Text Thickness
-   ; Colors
-   Red Blue Green Black White Yellow
-   ; Options
-   ImageSize PlotRange))
-
 ;;; An ATOMIC EXPRESSION is an
 ;  - number (integer, real, complex)
 ;  - reserved symbol (pi, e, i, inf, true, false)
@@ -808,13 +787,13 @@
 
 
 
+
 (module bracket racket
   (require (submod ".." number-theory)
            (submod ".." expression)
            (submod ".." undefined)
            (submod ".." equation-expression)
-           ;(submod ".." bracket-graphics)
-           )
+           "graphics.rkt")
   (provide ; (all-from-out (submod ".." symbolic-application))
    (rename-out [free-of Free-of]
                [base Base]
@@ -823,7 +802,7 @@
                [exponent Exponent]
                [before? Before?]
                [kind Kind])
-   ;(all-from-out (submod ".." bracket-graphics))
+   (all-from-out "graphics.rkt")
    Operand
    Operands
    Hold
@@ -1352,10 +1331,7 @@
   (check-equal? (Expand (Power (Plus a b) 2))
                 (Plus (Power a 2) (Times 2 a b) (Power b 2)))
   (check-equal? (Expand (Times a (Plus x y)))
-                (Plus (Times a x) (Times a y)))
-  
-  
-  )
+                (Plus (Times a x) (Times a y))))
 
 
 #;(require (submod "." symbolic-application)

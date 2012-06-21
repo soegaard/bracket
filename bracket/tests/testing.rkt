@@ -24,4 +24,4 @@ dot(a,b);
 norm(a);
 norm(b);
 proj(a,b);
-line({x0,y0},{z,w})
+line({x0,y0},{z,w});
