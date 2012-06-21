@@ -69,11 +69,11 @@
 (require racket/gui framework
          (except-in plot plot points)
          (prefix-in plot: plot)
-         "infix/main.rkt"
-         "infix/parser.rkt"
-         (planet williams/science/math)
-         "root-finding.rkt"
-         "clipboard.rkt")
+         "../infix/main.rkt"
+         "../infix/parser.rkt"
+         (except-in (planet williams/science/math) infinite? nan?)
+         "../numeric/root-finding.rkt"
+         "../utils/clipboard.rkt")
 
 ;;; 
 ;;; NUMERICAL
