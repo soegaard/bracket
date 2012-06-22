@@ -34,7 +34,8 @@
 
 ; <string> A number is a " followed by a series of non-" characters followed by a " .
 
-(provide parse-expression)
+(provide parse-expression
+         color-lexer)
 
 (require parser-tools/yacc
          parser-tools/lex
@@ -121,6 +122,48 @@
     (token-IDENTIFIER (string->symbol (regexp-replace* #rx"_" lexeme "-")))]
    [(:+ digit) (token-NUMBER (string->number lexeme))]
    [(:: (:+ digit) #\. (:* digit)) (token-NUMBER (string->number lexeme))]))
+
+; The color-expression-lexer is for syntax coloring.
+; The function returns 5 values:
+; - Either a string containing the matching text or the eof object. 
+;   Block comments and specials currently return an empty string. 
+;   This may change in the future to other string or non-string data.
+; - A symbol in '(error comment sexp-comment white-space constant 
+;                 string no-color parenthesis other symbol eof).
+; - A symbol in '(|(| |)| |[| |]| |{| |}|) or #f.
+; - A number representing the starting position of the match (or #f if eof).
+; - A number representing the ending position of the match (or #f if eof).
+
+(define color-lexer
+  (lexer-src-pos
+   [(eof)
+    (values eof #f #f start-pos end-pos)]
+   [(:or #\tab #\space #\newline)
+    (values lexeme 'white-space #f start-pos end-pos)]
+   [#\newline 
+    (begin
+      (/ 0 0)
+      (values lexeme 'white-space #f start-pos end-pos))]
+   [(:or ":=" "+" "-" "*" "/" "^" "<" ">" "=" "\"") 
+    (values lexeme 'symbol #f start-pos end-pos)]
+   [(:or "(" ")" "[" "]" "{" "}")
+    (values lexeme 'parenthesis #f start-pos end-pos)]
+   [(:or "[[" "," ";" "." "λ" "lambda" "√" "¬" "≤" "<=" "≥" ">=" "<>" "≠")
+    (values lexeme 'no-color #f start-pos end-pos)]
+   ["define"
+    (values lexeme 'constant (/ 0 0) start-pos end-pos)]
+   [string 
+    (values lexeme 'string #f start-pos end-pos)]
+   ; The parser can only look ahead 1 token, so we have 3 
+   ; different identifiers to see whether := or ( comes after the identfier.
+   ; This is enough to prevent shift/reduce conflicts between atom, definition,
+   ; and application.
+   [(:or identifier:= identifierOP identifier)
+    (values lexeme 'symbol #f start-pos end-pos)]
+   [(:+ digit) 
+    (values lexeme 'constant #f start-pos end-pos)]
+   [(:: (:+ digit) #\. (:* digit)) 
+    (values lexeme 'constant #f start-pos end-pos)]))
 
 
 ;; A macro to build the syntax object

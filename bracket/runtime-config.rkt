@@ -1,7 +1,12 @@
 #lang racket
-(require "show.rkt")
+(provide show show-enabled configure)
  
-(provide configure)
+(define show-enabled (make-parameter #f))
+ 
+(define (show v)
+  (when (show-enabled)
+    (display v)))
  
 (define (configure data)
   (show-enabled #t))
+

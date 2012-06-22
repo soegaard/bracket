@@ -1,7 +1,16 @@
 #lang racket
+; #lang s-exp syntax/module-reader
+; bracket
+; #:read                bracket-read
+; #:read-syntax         bracket-read-syntax
+; #:whole-body-readers? #t
+; #:info                get-info
+; #:language-info       #(bracket/bracket-info get-language-info #f)
+
 (provide (rename-out 
-          [bracket-read read]
-          [bracket-read-syntax read-syntax]))
+            [bracket-read read]
+            [bracket-read-syntax read-syntax])
+           get-info)
 
 (require "parser.rkt")
 (require syntax/strip-context)
@@ -11,6 +20,8 @@
    (bracket-read-syntax #'from-my-read in)))
 
 (define (bracket-read-syntax src in)
+  (displayln 'bracket-read-syntax)
+  (define out
   (if (eof-object? (peek-byte in))
       eof
       (with-syntax ([body (parse-expression 
@@ -23,7 +34,9 @@
                           (resolved-module-path-name
                            (module-path-index-resolve
                             (syntax-source-module #'here)))))
-                       (build-path base "../bracket-lang.rkt"))]
+                       (path->string 
+                        (simplify-path
+                         (build-path base "../bracket-lang.rkt"))))]
                     [bracket.rkt
                      (let ()
                        (define-values (base file _)
@@ -31,13 +44,14 @@
                           (resolved-module-path-name
                            (module-path-index-resolve
                             (syntax-source-module #'here)))))
-                       (build-path base "../bracket.rkt"))])
+                       (path->string 
+                        (simplify-path
+                         (build-path base "../bracket.rkt"))))])
         (syntax-property 
          (strip-context   
-          #'(module anything bracket-lang
-              (require (submod bracket.rkt bracket)
-                       (submod bracket.rkt symbolic-application)
-                       #;(submod bracket.rkt bracket-graphics))
+          #'(module main bracket/bracket-lang ; "bracket-lang.rkt" ; (file bracket-lang)
+              (require (submod (file bracket.rkt) bracket)
+                       (submod (file bracket.rkt) symbolic-application))
               (define-syntax (#%infix stx)
                 (syntax-case stx () [(_ expr) #'expr]))              
               ; This lists the operators used by the parser.
@@ -55,11 +69,36 @@
               body))
          'module-language
          '#(bracket/bracket-info get-language-info #f)))))
+  ;(write (syntax->datum out))
+  (write out)
+  (newline)
+  out)
+
+
+;(require racket/runtime-path)
+;(define-runtime-path color-lexer-path "parser.rkt")
+;(write color-lexer-path)
 
 (define (get-info in mod line col pos)
+  (displayln (list 'reader/get-info in mod line col pos))
   (lambda (key default)
+    (displayln (list  'reader/get-info  key default))
     (case key
       [(color-lexer)
-       (dynamic-require 'syntax-color/default-lexer
-                        'default-lexer)]
+       (dynamic-require 'bracket/lang/parser 'color-lexer)]
       [else default])))
+
+#;(define (get-info in mod line col pos)
+  (/ 0 0)
+  (lambda (key default)
+    (/ 0 0)
+    (case key
+      [(color-lexer)
+       #;(dynamic-require 'syntax-color/default-lexer
+                        'default-lexer)
+       (displayln "HErE")
+       (dynamic-require "parser.rkt"
+                        'color-lexer)]
+      [else default])))
+
+;(require syntax-color/default-lexer)
