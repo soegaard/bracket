@@ -1185,14 +1185,22 @@
   
   (define (Plot f range [options '(List)])
     ; TODO: Implement options
-    (displayln (list f range))
+    ;(displayln (list f range))
     (define y-min -5)
     (define y-max +5)
     (define excluded? #f)
-    (match range
+    ; TODO: plot2d needs to be extended to multiple functions
+    #;(define fs
+      (match functions
+        [(List: f ...) f]
+        [f             (list f)]
+        [else          (error 'Plot "TODO")]))
+    (define fs (list f))
+    (match range      
       [(List: var x-min x-max)
+       ; TODO: Declare var as a local variable ?
        (plot2d (if (procedure? f) 
-                   (λ (x) (displayln x) (f x)) 
+                   (λ (x) (f x)) 
                    (λ (x) (N (Substitute f (Equal var x)))))
                x-min x-max y-min y-max excluded?)]
       [else (error)]))

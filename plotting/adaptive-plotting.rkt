@@ -21,7 +21,7 @@
 ;;; http://scicomp.stackexchange.com/questions/2377/algorithms-for-adaptive-function-plotting
 ;;; for discussion on adaptive plotting.
 
-(define *debug* #t)
+(define *debug* #f)
 
 ; These count functions are used to measure the
 ; number of evaluations of the function to be drawn.
@@ -262,4 +262,3 @@
                           (list 
                            (list 'angle: angle)))))
      angle]))
-  

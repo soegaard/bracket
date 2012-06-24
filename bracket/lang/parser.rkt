@@ -71,7 +71,8 @@
   [string       (:: #\" (:* (:~ #\")) #\")]
   [identifier   (:: letter (:* (:or letter digit #\_ #\?)))]
   [identifier:= (:: letter (:* (:or letter digit #\_ #\?)) ":=")]
-  [identifierOP (:: letter (:* (:or letter digit #\_ #\?)) "(")])
+  [identifierOP (:: letter (:* (:or letter digit #\_ #\?)) "(")]
+  [comment      (:: "%" (complement (:: any-string #\newline any-string)) #\newline)])
 
 (define (string-drop-right n s)
   (substring s 0 (- (string-length s) n)))
@@ -105,6 +106,8 @@
    ["<>" 'NOT-EQUAL]
    ["≠" 'NOT-EQUAL]
    ["define" 'DEFINE]
+   [comment
+    (return-without-pos (expression-lexer input-port))]
    [string 
     (token-STRING (substring lexeme 1 (- (string-length lexeme) 1)))]
    ; The parser can only look ahead 1 token, so we have 3 
@@ -154,6 +157,8 @@
     (syn-val lexeme 'no-color #f start-pos end-pos)]
    ["define"
     (syn-val lexeme 'constant #f start-pos end-pos)]
+   [comment
+    (syn-val lexeme 'comment #f start-pos end-pos)]
    [string 
     (syn-val lexeme 'string #f start-pos end-pos)]
    ; The parser can only look ahead 1 token, so we have 3 
@@ -165,7 +170,10 @@
    [(:+ digit) 
     (syn-val lexeme 'constant #f start-pos end-pos)]
    [(:: (:+ digit) #\. (:* digit)) 
-    (syn-val lexeme 'constant #f start-pos end-pos)]))
+    (syn-val lexeme 'constant #f start-pos end-pos)]
+   ; catch anything else
+   [any-char 
+    (syn-val lexeme 'error #f start-pos end-pos)]))
 
 
 ;; A macro to build the syntax object
@@ -362,6 +370,7 @@
 
 (define (parse-expression src stx ip)
   (port-count-lines! ip)
+  (define out
   ((expression-parser
     (if src src (object-name ip))
     ; If you change any of these values, then
@@ -395,3 +404,5 @@
                 (eq? (position-token-token peek1) 'EOF))
            (begin0 peek1 (next))
            (begin0 peek  (next)))))))
+  (displayln out)
+  out)

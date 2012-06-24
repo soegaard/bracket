@@ -16,4 +16,5 @@
     [(_ sym ...)
      #'(begin (define sym 'sym) ...)]))
 
-
+(require bracket/lang/parser)
+(provide (all-from-out bracket/lang/parser))

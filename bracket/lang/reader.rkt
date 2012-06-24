@@ -57,6 +57,10 @@
               (define list-ref List-ref)
               (define-syntax (define stx)
                 (syntax-case stx () [(_ . more) #'(Define . more)]))
+              (require bracket/lang/parser)
+              (current-read-interaction
+               (λ (_ in)
+                 (parse-expression 'repl #'repl (open-input-string "1+2"))))
               body))
          'module-language
          '#(bracket/bracket-info get-language-info #f)))))
