@@ -24,7 +24,6 @@
 ;      | ( <e> )                 grouping
 ;      | <id> ( <args> ) := <e>  function definition
 
-
 ; <id>   An identifier begins with a letter, 
 ;        and is optionally followed by series of letters, digits or underscores.
 ;        An underscore is converted to a -. Thus list_ref will refer to list-ref.
@@ -134,36 +133,39 @@
 ; - A number representing the starting position of the match (or #f if eof).
 ; - A number representing the ending position of the match (or #f if eof).
 
+(define (syn-val a b c d e)
+  (values a b c 
+          (position-offset d)
+          #;(position-offset e) 
+          (max (position-offset e)
+               (+ (position-offset d) 1))))
+
 (define color-lexer
-  (lexer-src-pos
+  (lexer
    [(eof)
-    (values eof #f #f start-pos end-pos)]
+    (syn-val lexeme 'eof #f start-pos end-pos)]
    [(:or #\tab #\space #\newline)
-    (values lexeme 'white-space #f start-pos end-pos)]
-   [#\newline 
-    (begin
-      (/ 0 0)
-      (values lexeme 'white-space #f start-pos end-pos))]
+    (syn-val lexeme 'white-space #f start-pos end-pos)]   
    [(:or ":=" "+" "-" "*" "/" "^" "<" ">" "=" "\"") 
-    (values lexeme 'symbol #f start-pos end-pos)]
+    (syn-val lexeme 'symbol #f start-pos end-pos)]
    [(:or "(" ")" "[" "]" "{" "}")
-    (values lexeme 'parenthesis #f start-pos end-pos)]
+    (syn-val lexeme 'parenthesis #f start-pos end-pos)]
    [(:or "[[" "," ";" "." "λ" "lambda" "√" "¬" "≤" "<=" "≥" ">=" "<>" "≠")
-    (values lexeme 'no-color #f start-pos end-pos)]
+    (syn-val lexeme 'no-color #f start-pos end-pos)]
    ["define"
-    (values lexeme 'constant (/ 0 0) start-pos end-pos)]
+    (syn-val lexeme 'constant #f start-pos end-pos)]
    [string 
-    (values lexeme 'string #f start-pos end-pos)]
+    (syn-val lexeme 'string #f start-pos end-pos)]
    ; The parser can only look ahead 1 token, so we have 3 
    ; different identifiers to see whether := or ( comes after the identfier.
    ; This is enough to prevent shift/reduce conflicts between atom, definition,
    ; and application.
    [(:or identifier:= identifierOP identifier)
-    (values lexeme 'symbol #f start-pos end-pos)]
+    (syn-val lexeme 'symbol #f start-pos end-pos)]
    [(:+ digit) 
-    (values lexeme 'constant #f start-pos end-pos)]
+    (syn-val lexeme 'constant #f start-pos end-pos)]
    [(:: (:+ digit) #\. (:* digit)) 
-    (values lexeme 'constant #f start-pos end-pos)]))
+    (syn-val lexeme 'constant #f start-pos end-pos)]))
 
 
 ;; A macro to build the syntax object
@@ -224,7 +226,6 @@
 (define the-parser
   (parser
    (src-pos)
-   ; (suppress)  ; hmm...
    ;(debug "parser-dump.txt")
    ;(yacc-output "parser-dump.yacc")
    (start start)
@@ -249,18 +250,7 @@
              (position-line start)
              (position-col start)
              (position-offset start)
-             (+ (- (position-offset end) (position-offset start))))
-            #;(raise-syntax-error
-               #f
-               "syntax error"
-               (datum->syntax 
-                #'here 'here
-                (list 
-                 source-name 
-                 (position-line start)
-                 (position-col start)
-                 (position-offset start)
-                 (+ (- (position-offset end) (position-offset start))))))))
+             (+ (- (position-offset end) (position-offset start))))))
    
    (precs ; (left :=)
           ; (right OP)          
