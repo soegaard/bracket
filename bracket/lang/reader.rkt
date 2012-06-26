@@ -1,15 +1,25 @@
 #lang racket
 (provide (rename-out 
           [bracket-read read]
-          [bracket-read-syntax read-syntax])
+          [bracket-read-syntax read-syntax]
+          [bracket-read-expression-syntax read-expression-syntax])
          get-info)
 
 (require "parser.rkt")
-(require syntax/strip-context)
+(require syntax/strip-context
+         racket/syntax)
 
 (define (bracket-read in)
   (syntax->datum
    (bracket-read-syntax #'from-my-read in)))
+
+(define (bracket-read-expression-syntax src in)
+  (if (eof-object? (peek-byte in))
+      eof
+      (with-syntax ([body (parse-expression 
+                           src
+                           #'from-my-read-syntax in)])
+        (strip-context #'body))))
 
 (define (bracket-read-syntax src in)
   (define out
@@ -37,10 +47,11 @@
                             (syntax-source-module #'here)))))
                        (path->string 
                         (simplify-path
-                         (build-path base "../bracket.rkt"))))])
+                         (build-path base "../bracket.rkt"))))]
+                    [module-name (generate-temporary "main")])
         (syntax-property 
          (strip-context   
-          #'(module main bracket/bracket-lang
+          #'(module module-name bracket/bracket-lang
               (require (submod (file bracket.rkt) bracket)
                        (submod (file bracket.rkt) symbolic-application))
               (define-syntax (#%infix stx)
@@ -58,9 +69,9 @@
               (define-syntax (define stx)
                 (syntax-case stx () [(_ . more) #'(Define . more)]))
               (require bracket/lang/parser)
-              (current-read-interaction
-               (λ (_ in)
-                 (parse-expression 'repl #'repl (open-input-string "1+2"))))
+              #;(current-read-interaction
+                 (λ (_ in)
+                   (parse-expression 'repl #'repl in)))
               body))
          'module-language
          '#(bracket/bracket-info get-language-info #f)))))
@@ -74,5 +85,3 @@
       [(color-lexer)
        (dynamic-require 'bracket/lang/parser 'color-lexer)]
       [else default])))
-
-

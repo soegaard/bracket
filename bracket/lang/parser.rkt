@@ -79,7 +79,7 @@
 
 (define expression-lexer
   (lexer-src-pos
-   [(eof) 'EOF]
+   [(eof) (token-EOF)]
    [(:or #\tab #\space #\newline)    ; this skips whitespace
     (return-without-pos (expression-lexer input-port))] 
    [#\newline (token-newline)]  ; (token-newline) returns 'newline
@@ -392,7 +392,8 @@
    ; The following Tom Foolery is to needed to turn
    ;   SEMI EOF into EOF
    ; This allows one to have an optional semi colon in the end of the file.   
-   (let ([peek  (expression-lexer ip)]
+   (λ () (expression-lexer ip))
+   #;(let ([peek  (expression-lexer ip)]
          [peek1 (expression-lexer ip)])
      (define (next)
        (cond
@@ -404,5 +405,7 @@
                 (eq? (position-token-token peek1) 'EOF))
            (begin0 peek1 (next))
            (begin0 peek  (next)))))))
-  (displayln out)
-  out)
+  ;(displayln out)
+  (if (eq? out #f)
+      eof
+      out))
