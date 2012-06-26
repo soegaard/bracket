@@ -2,7 +2,6 @@
 (require plot)
 (provide plot2d)
 
-;;;
 ;;; This implements plotting a 2d graph of a one variable function.
 ;;; Singularities are handled properly (I think).
 
@@ -25,12 +24,17 @@
 
 ; These count functions are used to measure the
 ; number of evaluations of the function to be drawn.
+; They are only used during debugging.
 (define count 0)
 (define (reset-count) 
   (set! count 0))
 (define (increase-count) 
   (set! count (+ count 1)))
 
+; Plotting an arbitrary function without knowdledge of any
+; points in the domain where the function can ne undefined
+; risks triggering various exceptions. Handle these and 
+; return #f to signal x is not in the domain.
 (define (wrap f excluded-from-domain? [value-returned-on-error #f])
   (λ (x)
     (with-handlers ([(λ e #t) (λ x value-returned-on-error)])
