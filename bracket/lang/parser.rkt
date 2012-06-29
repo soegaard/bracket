@@ -366,45 +366,35 @@
      [(assignment-exp)                              $1])
      
     (exp 
-     [(compound-exp)                                $1]))))
+     [(compound-exp)                                $1]
+     [(compound-exp SEMI)                           $1]) ; the last SEMI is optional
+    )))
 
 (define (parse-expression src stx ip)
   (port-count-lines! ip)
   (define out
-  ((expression-parser
-    (if src src (object-name ip))
-    ; If you change any of these values, then
-    ; you must change the builder b which uses
-    ; the the values in here to add to newly read
-    ; objects. If the lexer/parser was only to
-    ; read from entire files, there would be no problem,
-    ; but sometimes one must read from strings 
-    ; entered in a repl. There the syntax-objects must be 
-    ; adjusted.
-    (datum->syntax #f
-                   'here
-                   (list (if src src (object-name ip))
-                         1   ; line 1
-                         0   ; column 0
-                         1   ; offset/position 1 (contract for datum->syntax requires a positive offset)
-                         #f) ; span
-                   )) ; no properties
-   ; The following Tom Foolery is to needed to turn
-   ;   SEMI EOF into EOF
-   ; This allows one to have an optional semi colon in the end of the file.   
-   (λ () (expression-lexer ip))
-   #;(let ([peek  (expression-lexer ip)]
-         [peek1 (expression-lexer ip)])
-     (define (next)
-       (cond
-         [(eq? (position-token-token peek) 'EOF) (void)]
-         [else (set! peek peek1)
-               (set! peek1 (expression-lexer ip))]))
-     (λ ()
-       (if (and (eq? (position-token-token peek) 'SEMI)
-                (eq? (position-token-token peek1) 'EOF))
-           (begin0 peek1 (next))
-           (begin0 peek  (next)))))))
+    ((expression-parser
+      (if src src (object-name ip))
+      ; If you change any of these values, then
+      ; you must change the builder b which uses
+      ; the the values in here to add to newly read
+      ; objects. If the lexer/parser was only to
+      ; read from entire files, there would be no problem,
+      ; but sometimes one must read from strings 
+      ; entered in a repl. There the syntax-objects must be 
+      ; adjusted.
+      (datum->syntax #f
+                     'here
+                     (list (if src src (object-name ip))
+                           1   ; line 1
+                           0   ; column 0
+                           1   ; offset/position 1 (contract for datum->syntax requires a positive offset)
+                           #f) ; span
+                     )) ; no properties
+     ; The following Tom Foolery is to needed to turn
+     ;   SEMI EOF into EOF
+     ; This allows one to have an optional semi colon in the end of the file.   
+     (λ () (expression-lexer ip))))
   ;(displayln out)
   (if (eq? out #f)
       eof
