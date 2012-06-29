@@ -14,6 +14,9 @@
 (define-syntax (DeclareVars stx)
   (syntax-case stx ()
     [(_ sym ...)
-     #'(begin (define sym 'sym) ...)]))
+     #'(begin 
+         (define sym 'sym) ...
+         (set! sym 'sym) ...)]))
+
 
 
