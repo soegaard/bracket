@@ -45,7 +45,7 @@
          (prefix-in : parser-tools/lex-sre)
          syntax/readerr)
 
-(define-tokens value-tokens (NUMBER STRING IDENTIFIER IDENTIFIEROP IDENTIFIER:=))
+(define-tokens value-tokens (NUMBER STRING IDENTIFIER IDENTIFIEROP IDENTIFIER:= SPECIAL))
 (define-empty-tokens 
   op-tokens 
   (newline 
@@ -83,7 +83,8 @@
 
 (define expression-lexer
   (lexer-src-pos
-   [(eof) (token-EOF)]
+   [(eof)     (token-EOF)]
+   [(special) (token-SPECIAL lexeme)]
    [(:or #\tab #\space #\newline)    ; this skips whitespace
     (return-without-pos (expression-lexer input-port))] 
    [#\newline (token-newline)]  ; (token-newline) returns 'newline
@@ -296,6 +297,7 @@
      [(NUMBER)                                      (b o $1 1 1)]
      [(IDENTIFIER)                (prec IDENTIFIER) (b o $1 1 1)]
      [(STRING)                                      (b o $1 1 1)]
+     [(SPECIAL)                                     (b o $1 1 1)]
      [(parenthensis-exp)                            $1])
     
     (construction-exp
