@@ -31,11 +31,13 @@
 
 (define (unparse-sum form [first? #t] [level-below-times? #f])
   (case (operator form)
-    [(Plus) 
-     (string-append* 
-      (maybe-add-between 
-       (map unparse-product (operands form))
-       "+" #\-))]
+    [(Plus)
+     (define ops (operands form))
+     (define unwrapped
+       (string-append* 
+        (maybe-add-between (map unparse-product ops) "+" #\-)))
+     (wrap-if (and level-below-times? (>= (length ops) 2))
+              unwrapped)]
     [else
      (unparse-product form first? level-below-times?)]))
 
@@ -81,7 +83,9 @@
      (format "(~a)" (unparse-sum form #t))]
     [(times-expression? form)
      (format "(~a)" (unparse-product form #t))]
-    [else (error 'unparse-factor "Internal Bracket Error, got " form)]))
+    [else
+     ; pass value unchanged: stuff like #void, #eof, special values etc.
+     form]))
 
 (define (unparse-power form)
   (case (operator form)
@@ -134,6 +138,8 @@
   ; Powers of products
   (check-equal? (unparse '(Power (Times x y) 3)) "(x*y)^3")
   (check-equal? (unparse '(Power (Times x y) 3)) "(x*y)^3")
+  ; Powers of sums
+  (check-equal? (unparse '(Power (Plus x 3) 7)) "(x+3)^7")
   ; Sums of products
   (check-equal? (unparse '(Plus  2 (Times 3 x)  (Times  4 y)))  "2+3*x+4*y")
   (check-equal? (unparse '(Plus  2 (Times 3 x)  (Times -4 y)))  "2+3*x-4*y")

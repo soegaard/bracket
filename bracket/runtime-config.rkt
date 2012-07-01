@@ -1,7 +1,13 @@
 #lang racket
 (provide configure)
 
-(require bracket/lang/reader)
+;;;
+;;; This file configures the repl in DrRacket/racket,
+;;; when the bracket language is used.
+;;;
+
+(require bracket/lang/reader 
+         bracket/unparse)
  
 (define (configure data)
   (current-read-interaction read0)
@@ -10,8 +16,12 @@
                     (define val (old-eval form))
                     (displayln (list 'eval-result: val))
                     val))
-  #;(define old-print (current-print))
+  (define old-print (current-print))
   #;(current-print (λ (val) (displayln (list 'print: val)) (old-print val)))
+  (current-print 
+   (λ (val) 
+     (unless (void? val)
+       (displayln (unparse val)))))
   )
 
 
