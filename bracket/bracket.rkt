@@ -789,7 +789,6 @@
 
 
 
-
 (module bracket racket
   (require (submod ".." number-theory)
            (submod ".." expression)
@@ -1222,6 +1221,9 @@
   )
 
 
+   
+   
+
 (module test racket
   (require (submod ".." symbolic-application)
            (submod ".." bracket)
@@ -1235,7 +1237,7 @@
   (define d 'd)
   (define f 'f)
   
-  (displayln "TEST - Running tests in mpl.rkt")
+  (displayln "TEST - Running tests in bracket.rkt")
   
   ;;; Kind
   (check-equal? (Kind 1) 'integer)

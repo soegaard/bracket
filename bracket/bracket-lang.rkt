@@ -4,9 +4,11 @@
 (error-print-source-location #t)
 
 (require (submod "bracket.rkt" symbolic-application)
-         (submod "bracket.rkt" bracket))
+         (submod "bracket.rkt" bracket)
+         "unparse.rkt")
 
-(provide (all-from-out racket))
+(provide (all-from-out racket)
+         unparse)
 (provide (all-defined-out)
          (for-syntax #%module-begin)
          #%module-begin)
