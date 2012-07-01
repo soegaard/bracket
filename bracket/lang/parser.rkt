@@ -1,7 +1,11 @@
 #lang racket
 (require "parameter.rkt")
 (require syntax/srcloc)
- 
+
+;;;
+;;; TODO: Handle special values.
+;;;       Pasting an image into the REPL breaks the parser at the moment.
+
 ;;;
 ;;; NOTES: 
 ;;;   Changes from planet version:  ]] (CDB) Bug fixed

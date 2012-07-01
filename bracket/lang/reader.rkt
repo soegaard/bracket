@@ -14,7 +14,7 @@
    (bracket-read-syntax #'from-my-read in)))
 
 (define (bracket-read-expression-syntax src in)
-  (if (eof-object? (peek-byte in))
+  (if (eof-object? (peek-byte-or-special in))
       eof
       (with-syntax ([body (parse-expression 
                            src
