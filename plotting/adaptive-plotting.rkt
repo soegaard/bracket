@@ -144,7 +144,10 @@
                                   (loop more (list x2) (cons (reverse (cons x1 ys)) xss))
                                   (loop (cons x2 more) (cons x1 ys) xss))])))
 
-(define (plot2d unwrapped-f [x-min -5] [x-max 5] [y-min -5] [y-max 5] [excluded? #f])
+(define (cons-if bool x xs)
+  (if bool (cons x xs) xs))
+
+(define (plot2d unwrapped-f [x-min -5] [x-max 5] [y-min -5] [y-max 5] [excluded? #f] [axes? #t])
   ; wrap the function to be drawn, s.t. it 
   ; returns #f in error situations
   (define (excluded-from-domain? x)
@@ -191,13 +194,15 @@
   ; for visual comparision.
   
   (if *debug*  
-    (begin
+      (begin
       (displayln
        (list
         (begin0
-          (plot (list (map lines 
-                           (map remove-non-numbers 
-                                connected-points)))
+          (plot (list 
+                 (cons-if axes? (axes)
+                          (map lines 
+                               (map remove-non-numbers 
+                                    connected-points))))
                 #:x-min x-min #:x-max x-max 
                 #:y-min y-min #:y-max y-max)
           (displayln (format "adaptive number of evaluations: ~a" count))
@@ -209,9 +214,11 @@
       (reset-count))
     
     
-    (plot (list (map lines 
-                     (map remove-non-numbers 
-                          connected-points)))
+    (plot (list 
+           (cons-if axes? (axes)
+                    (map lines 
+                         (map remove-non-numbers 
+                              connected-points))))
           #:x-min x-min #:x-max x-max 
           #:y-min y-min #:y-max y-max)))
 

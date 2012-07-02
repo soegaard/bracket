@@ -830,7 +830,10 @@
    List->Set
    Define
    Range
-   Plot)
+   Plot 
+   ; Plot options:
+   Axes
+   )
   
   ;;;
   ;;; INVARIANT 
@@ -1182,6 +1185,8 @@
     ; TODO: Improve this
     (eval u ns))
   
+  ; Plot options:
+  (define Axes 'Axes)
   (define (Plot f range [options '(List)])
     ; TODO: Implement options
     ;(displayln (list f range))
@@ -1190,18 +1195,19 @@
     (define excluded? #f)
     ; TODO: plot2d needs to be extended to multiple functions
     #;(define fs
-      (match functions
+        (match functions
         [(List: f ...) f]
         [f             (list f)]
         [else          (error 'Plot "TODO")]))
     (define fs (list f))
+    (define axes? (Member? Axes options))
     (match range      
       [(List: var x-min x-max)
        ; TODO: Declare var as a local variable ?
        (plot2d (if (procedure? f) 
-                   (λ (x) (f x)) 
+                    (λ (x) (f x)) 
                    (λ (x) (N (Substitute f (Equal var x)))))
-               x-min x-max y-min y-max excluded?)]
+               x-min x-max y-min y-max excluded? axes?)]
       [else (error)]))
   
   #;(and (real? x-min) (real? x-max) (real? y-min) (real? y-max)
