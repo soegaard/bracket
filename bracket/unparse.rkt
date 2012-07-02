@@ -75,14 +75,14 @@
     [(list-expression? form)
      (format "{~a}" 
              (string-append* (add-between (map/first? #t unparse (operands form)) ",")))]
-    [(or (compound-expression? form)
-         (set-expression? form))
-     (format "~a(~a)" (operator form)
-             (string-append* (add-between (map/first? #t unparse (operands form)) ",")))]
     [(plus-expression? form)
      (format "(~a)" (unparse-sum form #t))]
     [(times-expression? form)
      (format "(~a)" (unparse-product form #t))]
+    [(or (compound-expression? form)
+         (set-expression? form))
+     (format "~a(~a)" (operator form)
+             (string-append* (add-between (map/first? #t unparse (operands form)) ",")))]    
     [else
      ; pass value unchanged: stuff like #void, #eof, special values etc.
      form]))
@@ -153,4 +153,6 @@
   (check-equal? (unparse '(Times -2 (Sin x)))  "-2*Sin(x)")
   (check-equal? (unparse '(Times -2 (Sin x) (Cos y)))  "-2*Sin(x)*Cos(y)")
   (check-equal? (unparse '(Power (Times -2 (Sin x)) 5))  "(-2*Sin(x))^5")
+  ; A sum as factor
+  (check-equal? (unparse '(Times x (Plus -9 (Power x 2)))) "x*(-9+x^2)")
   )
