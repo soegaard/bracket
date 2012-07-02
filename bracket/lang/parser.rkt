@@ -70,7 +70,9 @@
    EOF))
 
 (define-lex-abbrevs
-  [letter       (:or (:/ "a" "z") (:/ #\A #\Z) )]
+  [greek        (:or (char-range #\α #\ω) (char-range #\Γ #\Ω))]
+  [roman        (:or (:/ "a" "z") (:/ #\A #\Z) )]
+  [letter       (:or roman greek)]
   [digit        (:/ #\0 #\9)]
   [string       (:: #\" (:* (:~ #\")) #\")]
   [identifier   (:: letter (:* (:or letter digit #\_ #\?)))]
@@ -149,6 +151,8 @@
                (+ (position-offset d) 1))))
 
 (define color-lexer
+  ; REMEMBER to restart DrScheme to test any changes in the color-lexer.
+  ; The lexer is only imported into DrRacket at startup.
   (lexer
    [(eof)
     (syn-val lexeme 'eof #f start-pos end-pos)]
