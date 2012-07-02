@@ -236,7 +236,7 @@
       [(reserved? u)        'reserved]
       [(symbolic-id? u)     'symbolic-id]
       [(list? u)            (operator u)]
-      [else (error 'kind "Internal error: Unhandled simplified expression type: " u)]))
+      [else (error 'kind "Internal Bracket Error: Unhandled simplified expression type: " u)]))
   
   (define (complete-sub-expressions u)
     ; return a list of all complete sub-expressions of u
