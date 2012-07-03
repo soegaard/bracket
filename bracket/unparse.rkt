@@ -77,10 +77,10 @@
              (string-append* (add-between (map/first? #t unparse (operands form)) ",")))]
     [(plus-expression? form)
      (format "(~a)" (unparse-sum form #t))]
-    [(times-expression? form)
+    [(times-expression? form) ; This case is for unsimplified expressions
      (format "(~a)" (unparse-product form #t))]
-    [(or (compound-expression? form)
-         (set-expression? form))
+    [(compound-expression? form)
+     ; Note: Set expressions are compound expressions.
      (format "~a(~a)" (operator form)
              (string-append* (add-between (map/first? #t unparse (operands form)) ",")))]    
     [else
@@ -95,7 +95,7 @@
      (define bi (unparse b #f #t))
      (define ei (unparse e #f #t))
      (format "~a^~a" bi ei)]
-    [else (error)]))
+    [else (error 'unparse-power "Internal Bracket Error: got non-power: ~a" form)]))
 
 
 (module* test #f
@@ -127,6 +127,8 @@
   (check-equal? (unparse '(Times 2 x)) "2*x")
   (check-equal? (unparse '(Times 2/3 x)) "2/3*x")
   (check-equal? (unparse '(Times -2 x)) "-2*x")
+  ; Products of products (unsimplified)
+  (check-equal? (unparse '(Times 2 (Times 3 x) (Times -5 y))) "2*(3*x)*(-5*y)")
   ; Powers
   (check-equal? (unparse '(Power 2 3)) "2^3")
   (check-equal? (unparse '(Power -2 3)) "(-2)^3")
@@ -155,4 +157,14 @@
   (check-equal? (unparse '(Power (Times -2 (Sin x)) 5))  "(-2*Sin(x))^5")
   ; A sum as factor
   (check-equal? (unparse '(Times x (Plus -9 (Power x 2)))) "x*(-9+x^2)")
+  ; List
+  (check-equal? (unparse '(List)) "{}")
+  (check-equal? (unparse '(List 1)) "{1}")
+  (check-equal? (unparse '(List 1 2)) "{1,2}")
+  (check-equal? (unparse '(List 1 2 3)) "{1,2,3}")
+  ; Set
+  (check-equal? (unparse '(Set)) "Set()")
+  (check-equal? (unparse '(Set 1)) "Set(1)")
+  (check-equal? (unparse '(Set 1 2)) "Set(1,2)")
+  (check-equal? (unparse '(Set 1 2 3)) "Set(1,2,3)")
   )
