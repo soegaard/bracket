@@ -53,10 +53,6 @@
 ;   expression u itself or an operand of some
 ;   operator in u.
 
-
-
-
-
 (module undefined racket/base
   (provide undefined undefined?)
   (define undefined 'undefined)
@@ -818,8 +814,13 @@
    Plot 
    ; Plot options:
    Axes
+   ; Reserved symbols
+   @pi @e @i @inf
    )
-  
+  (define @pi  '@pi)
+  (define @e   '@e)
+  (define @i   '@i)
+  (define @inf '@inf)
   ;;;
   ;;; INVARIANT 
   ;;;
@@ -1134,7 +1135,8 @@
   
   (define (Solve-linear a b)
     ; return List of all solutions to ax+b=0
-    (if (and (number? a) (not (zero? a)))
+    (if (or (and (number? a) (not (zero? a)))
+            (not (number? a)))
         (List (Minus (Quotient b a)))
         (List)))
   
@@ -1345,11 +1347,21 @@
   (check-equal? (If (Equal 1 1) 2 3) 2)
   (check-equal? (If (Equal 1 2) 2 3) 3)
   (check-equal? (If (Equal 1 x) 2 3) '(If (Equal 1 x) 2 3))
+  ; Hold
+  (check-equal? (Hold (Plus 1 2)) '(Hold (Plus 1 2)))
+  ; Reserved symbols
+  (check-equal? (Plus @pi  @pi)   '(Times 2 @pi))
+  (check-equal? (Plus @e   @e)    '(Times 2 @e))
+  (check-equal? (Plus @i   @i)    '(Times 2 @i))
+  (check-equal? (Plus @inf @inf)  '(Times 2 @inf))
+  ; Solve-linear
+  (check-equal? (Solve-linear 2 3) '(List -3/2))
+  (check-equal? (Solve-linear a b) (List (Minus (Quotient b a))))
   )
 
 
 #;(require (submod "." symbolic-application)
-           (submod "." mpl))
+           (submod "." bracket))
 
 ;(define x 'x)
 ;(define y 'y)
