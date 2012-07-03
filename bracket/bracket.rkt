@@ -1141,20 +1141,23 @@
         (List)))
   
   (define Range 
+    ; 0-based when only given imax
     (case-lambda
       [()              
        (list 'Range)]
       [(imax)
-       (if (number? imax) (range imax) `(Range ,imax))]
+       (if (number? imax) 
+           (list->List (range imax))
+           `(Range ,imax))]
       [(imin imax)
        (if (and (number? imin) (number? imax))
-           (range imin imax)
+           (list->List (range imin imax))
            `(Range ,imin ,imax))]
       [(imin imax di)       
        (if (and (number? imin) 
                 (number? imax)
                 (number? di))
-           (range imin imax di)
+           (list->List (range imin imax di))
            `(Range ,imin ,imax ,di))]
       [args `(Range . ,args)]))
   
@@ -1357,6 +1360,10 @@
   ; Solve-linear
   (check-equal? (Solve-linear 2 3) '(List -3/2))
   (check-equal? (Solve-linear a b) (List (Minus (Quotient b a))))
+  ; Range (as range in Racket)
+  (check-equal? (Range 5)      (List 0 1 2 3 4))
+  (check-equal? (Range 2 5)    (List 2 3 4))
+  (check-equal? (Range 2 10 3) (List 2 5 8))
   )
 
 
