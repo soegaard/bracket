@@ -82,10 +82,12 @@
     [(compound-expression? form)
      ; Note: Set expressions are compound expressions.
      (format "~a(~a)" (operator form)
-             (string-append* (add-between (map/first? #t unparse (operands form)) ",")))]    
+             (string-append* (add-between (map/first? #t unparse (operands form)) ",")))]
+    
     [else
-     ; pass value unchanged: stuff like #void, #eof, special values etc.
-     form]))
+     ; TODO: pass value unchanged: stuff like #void, #eof, special values etc.
+     (format "~a" (object-name form))
+     #;(format form)]))
 
 (define (unparse-power form)
   (case (operator form)

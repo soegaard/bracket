@@ -53,10 +53,7 @@
 ;   expression u itself or an operand of some
 ;   operator in u.
 
-(module undefined racket/base
-  (provide undefined undefined?)
-  (define undefined 'undefined)
-  (define (undefined? e) (eq? e 'undefined)))
+(require "undefined.rkt")
 
 (module identifiers racket
   (provide symbolic-id? reserved?)  
@@ -114,7 +111,8 @@
 
 (module expression-core racket
   (require (submod ".." identifiers)
-           (submod ".." undefined))
+           "undefined.rkt"
+           #;(submod ".." undefined))
   (provide atomic-expression?
            compound-expression?
            list-expression?
@@ -238,7 +236,8 @@
 
 (module simplify racket
   (require (submod ".." expression-core)
-           (submod ".." undefined)
+           "undefined.rkt"
+           #;(submod ".." undefined)
            (submod ".." identifiers))
   (require (planet dherman/memoize:3:1))
   
@@ -773,7 +772,8 @@
 (module bracket racket
   (require "../number-theory/number-theory.rkt"
            (submod ".." expression)
-           (submod ".." undefined)
+           "undefined.rkt"
+           ; (submod ".." undefined)
            (submod ".." equation-expression)
            "graphics.rkt")
   (provide 
@@ -1215,9 +1215,6 @@
   ;                (eq? (Kind exponent) 'integer)
   ;                (> exponent 1))
   )
-
-
-   
    
 
 (module test racket
@@ -1297,6 +1294,9 @@
   (check-equal? (Times (List 1 x)) (List 1 x))
   (check-equal? (Times (List 1 2) (List 4 5)) (List 4 10))
   (check-equal? (Power (List 3 x) 2) (List 9 (Power x 2)))
+  ; No threading when lists are of different lenghts
+  ;(check-equal? (Plus (List 1 2) (list 3 4 5)) '(Plus (List 1 2) (List 3 4 5)))
+  ;(check-equal? (Times (List 1 2) (list 3 4 5)) '(Times (List 1 2) (List 3 4 5)))
   
   ;;; Substitute
   (check-equal? (Substitute (Plus a b) (Equal b x))
@@ -1359,6 +1359,7 @@
   (check-equal? (Plus @inf @inf)  '(Times 2 @inf))
   ; Solve-linear
   (check-equal? (Solve-linear 2 3) '(List -3/2))
+  (check-equal? (Solve-linear 0 3) '(List))
   (check-equal? (Solve-linear a b) (List (Minus (Quotient b a))))
   ; Range (as range in Racket)
   (check-equal? (Range 5)      (List 0 1 2 3 4))
