@@ -83,6 +83,7 @@
 (define (string-drop-right n s)
   (substring s 0 (- (string-length s) n)))
 
+
 (define expression-lexer
   (lexer-src-pos
    [(eof)     (token-EOF)]
@@ -184,35 +185,67 @@
    [any-char 
     (syn-val lexeme 'error #f start-pos end-pos)]))
 
+; read-syntax puts on the syntax-object read s.t.
+; DrRacket knows it is original syntax.
+; And then DrRacket draws arrows after check syntax.
+(define (sym->original-syntax sym srcloc)
+  (define p (open-input-string (symbol->string sym)))
+  (port-count-lines! p)
+  (match-define (list source-name line column position span) srcloc)
+  (set-port-next-location! p line column position)
+  (read-syntax source-name p))
 
 ;; A macro to build the syntax object
-(define-syntax (b stx)
+(define-for-syntax (build stx original?)
   (syntax-case stx ()
     [(_ o value start end)
-     #'(b o value start end 0 0)]
+     (if original?
+         #'(borg o value start end 0 0)
+         #'(b o value start end 0 0))]
     [(_ o value start end start-adjust end-adjust)
      (with-syntax 
-         ((start-pos (datum->syntax #'start
-                                    (string->symbol 
-                                     (format "$~a-start-pos"
-                                             (syntax->datum #'start)))))
-          (end-pos (datum->syntax #'end
-                                  (string->symbol 
-                                   (format "$~a-end-pos" 
-                                           (syntax->datum #'end))))))
+      ([start-pos (datum->syntax #'start
+                                 (string->symbol 
+                                  (format "$~a-start-pos"
+                                          (syntax->datum #'start))))]
+       [end-pos (datum->syntax #'end
+                               (string->symbol 
+                                (format "$~a-end-pos" 
+                                        (syntax->datum #'end))))]
+       [org (if original? #t #f)])
        #`(datum->syntax 
-          o
-          value
-          (list (if (syntax? o) (syntax-source o) 'missing-in-action--sorry)
-                (if (and o (syntax-line o)) 
-                    (+ (syntax-line o) (position-line start-pos) start-adjust -1) #f)
-                (if (and o (syntax-column o))
-                    (+ (syntax-column o) (position-offset start-pos) start-adjust) #f)
-                (if (and o (syntax-position o))
-                    (+ (syntax-position o) (- (position-offset start-pos) start-adjust 1)) #f)
-                (- (+ (position-offset end-pos) end-adjust)
-                   (+ (position-offset start-pos) start-adjust)))
-          o o))]))
+         o
+         (if (and org (or (symbol? value) (identifier? value)))
+             (sym->original-syntax 
+              value (list (if (syntax? o) (syntax-source o) 'missing-in-action--sorry) 
+                          (if (and o (syntax-line o)) 
+                              (+ (syntax-line o) (position-line start-pos) start-adjust -1) #f)
+                          (if (and o (syntax-column o))
+                              (+ (syntax-column o) (position-offset start-pos) start-adjust) #f)
+                          (if (and o (syntax-position o))
+                              (+ (syntax-position o) (- (position-offset start-pos) start-adjust 1)) #f)
+                          (- (+ (position-offset end-pos) end-adjust)
+                             (+ (position-offset start-pos) start-adjust))))
+             value)
+         (list (if (syntax? o) (syntax-source o) 'missing-in-action--sorry)
+               (if (and o (syntax-line o)) 
+                   (+ (syntax-line o) (position-line start-pos) start-adjust -1) #f)
+               (if (and o (syntax-column o))
+                   (+ (syntax-column o) (position-offset start-pos) start-adjust) #f)
+               (if (and o (syntax-position o))
+                   (+ (syntax-position o) (- (position-offset start-pos) start-adjust 1)) #f)
+               (- (+ (position-offset end-pos) end-adjust)
+                  (+ (position-offset start-pos) start-adjust)))
+         o o))]))
+
+(define-syntax (b stx)
+  (build stx #f))
+
+(define-syntax (borg stx)
+  (define out (build stx #t))
+  ;(displayln (list 'borg out))
+  out)
+
 
 ; for testing: builds lists instead of syntax objects
 #;(define-syntax (b stx)
@@ -270,16 +303,16 @@
              (+ (- (position-offset end) (position-offset start))))))
    
    (precs ; (left :=)
-          ; (right OP)          
-          (left - +)
-          (left * /)
-          (right OB)
-          (right ^)
-          (left =)  ; comparisons
-          (right NEG)
-          (left SEMI)
-          ; (right IDENTIFIER)
-          )
+    ; (right OP)          
+    (left - +)
+    (left * /)
+    (right OB)
+    (right ^)
+    (left =)  ; comparisons
+    (right NEG)
+    (left SEMI)
+    ; (right IDENTIFIER)
+    )
    
    (grammar    
     (start [(exp) (b o `(#%infix ,$1) 1 1)] 
@@ -293,13 +326,13 @@
     
     (ids [()               '()]
          [(IDENTIFIER ids) (b o (cons $1 $2) 1 2)])
-        
+    
     (parenthensis-exp
      [(OP exp CP)                                   $2])
     
     (atom 
      [(NUMBER)                                      (b o $1 1 1)]
-     [(IDENTIFIER)                (prec IDENTIFIER) (b o $1 1 1)]
+     [(IDENTIFIER)                (prec IDENTIFIER) (borg o $1 1 1)]
      [(STRING)                                      (b o $1 1 1)]
      [(SPECIAL)                                     (b o $1 1 1)]
      [(parenthensis-exp)                            $1])
@@ -312,12 +345,12 @@
     (application-exp
      ;[(application-exp OB args CB)                 (b o `(,$1 ,@$3) 1 4)]                     ; function application
      ; Due the extra ( in IDENTIFIEROP we need to adjust the end with -1.
-     [(IDENTIFIEROP args CP)                        (b o `(,(b o $1 1 1 0 -1) ,@$2) 1 3)]      ; function application
+     [(IDENTIFIEROP args CP)                        (b o `(,(borg o $1 1 1 0 -1) ,@$2) 1 3)]      ; function application
      [(application-exp OP args CP)      (prec OP)   (b o `(,$1 ,@$3) 1 4 )]                    ; function application
      [(application-exp ODB exp CB CB)               (b o `(,(b o 'list-ref 1 4) ,$1 ,$3) 1 4)] ; list ref
      [(construction-exp)                            $1])
     
-
+    
     #;(implicit-exp
        [(application-exp application-exp) (prec *)  (b o `(,(b o '* 1 2) ,$1 ,$2) 1 2)]    ; implicit
        [(application-exp)                           $1])
@@ -339,7 +372,7 @@
      [(multiplication-exp / negation-exp) (prec /)  (b o `(,(b o '/ 2 2) ,$1 ,$3) 1 3)]
      ;[(multiplication-exp  negation-exp) (prec *)  (b o `(,(b o '* 1 2) ,$1 ,$2) 1 2)]
      [(negation-exp)                                $1])
-     
+    
     (addition-exp
      [(addition-exp - multiplication-exp) (prec -)  (b o `(,(b o '- 2 2) ,$1 ,$3) 1 3)]
      [(addition-exp + multiplication-exp) (prec +)  (b o `(,(b o '+ 2 2) ,$1 ,$3) 1 3)]
@@ -363,18 +396,18 @@
     (assignment-exp
      ;[(DEFINE IDENTIFIER := assignment-exp)               (b o `(,(b o 'define 3 3) ,$2 ,$4) 2 4)]
      ;[(DEFINE IDENTIFIER OP args CP := assignment-exp)    (b o `(,(b o 'define 4 4) (,$2 ,@$4) ,$7) 2 6)]
-     [(IDENTIFIER:= assignment-exp)                  (b o `(,(b o 'define 1 1) 
-                                                            ,(b o $1 1 1 
+     [(IDENTIFIER:= assignment-exp)                  (borg o `(,(b o 'define 1 1) 
+                                                            ,(borg o $1 1 1 
                                                                 ; adjust end with -2 due to the chars in :=
                                                                 0 -2)
                                                             ,(b o $2 2 2)) 1 2)]
-     [(IDENTIFIEROP args CP := assignment-exp)       (b o `(,(b o 'define 2 2) (,$1 ,@$2) ,$5) 1 5)]
+     [(IDENTIFIEROP args CP := assignment-exp)       (b o `(,(b o 'define 2 2) (,(borg o $1 1 1) ,@(borg o $2 2 2)) ,$5) 1 5)]
      [(logical-negation-exp)                          $1])
     
     (compound-exp 
      [(compound-exp SEMI assignment-exp)            (b o `(,(b o 'begin 2 2) ,$1 ,$3) 1 3)]
      [(assignment-exp)                              $1])
-     
+    
     (exp 
      [(compound-exp)                                $1]
      [(compound-exp SEMI)                           $1]) ; the last SEMI is optional

@@ -50,7 +50,8 @@
                          (build-path base "../bracket.rkt"))))]
                     [module-name (generate-temporary "main")])
         (syntax-property 
-         (strip-context   
+         (replace-context #'here
+          ;strip-context   
           #'(module module-name bracket/bracket-lang
               (require (submod (file bracket.rkt) bracket)
                        (submod (file bracket.rkt) symbolic-application))
@@ -76,7 +77,7 @@
          'module-language
          '#(bracket/bracket-info get-language-info #f)))))
   ; DEBUG This line displays the syntax object returned by the reader.
-  ;   (write out) (newline)
+  ; (write out) (newline)
   out)
 
 (define (get-info in mod line col pos)

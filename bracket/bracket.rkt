@@ -53,7 +53,7 @@
 ;   expression u itself or an operand of some
 ;   operator in u.
 
-(require "undefined.rkt")
+;(require "undefined.rkt")
 
 (module identifiers racket
   (provide symbolic-id? reserved?)  
