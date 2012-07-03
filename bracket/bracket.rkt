@@ -55,24 +55,7 @@
 
 
 
-(module number-theory racket/base
-  (provide binomial)
-  
-  ; binomial : natural natural -> natural
-  ;  compute the binomial coeffecient n choose k
-  (define (binomial n k)
-    ; <http://www.swox.com/gmp/manual/Binomial-Coefficients-Algorithm.html>
-    ; http://lavica.fesb.hr/cgi-bin/info2html?(gmp)Binomial%20Coefficients%20Algorithm
-    ; TODO: Check range of n and k
-    (cond
-      [(= k 0)       1]
-      [(= k 1)       n]
-      [(= k 2)       (/ (* n (- n 1)) 2)]
-      [(> k (/ n 2)) (binomial n (- n k))]
-      [else          (* (+ n (- k) 1)
-                        (for/product ([i (in-range 2 (+ k 1))])
-                          (/ (+ n (- k) i)
-                             i)))])))
+
 
 (module undefined racket/base
   (provide undefined undefined?)
@@ -87,6 +70,8 @@
   (define (symbolic-id? id)
     (or (symbol? id)
         (and (syntax? id)
+             ; Syntax symbolical identifiers are not in use.
+             ; Remove this?
              (memv (syntax-e id)
                    '(Plus Minus Times Quotient Power =))))))
 
@@ -790,12 +775,12 @@
 
 
 (module bracket racket
-  (require (submod ".." number-theory)
+  (require "../number-theory/number-theory.rkt"
            (submod ".." expression)
            (submod ".." undefined)
            (submod ".." equation-expression)
            "graphics.rkt")
-  (provide ; (all-from-out (submod ".." symbolic-application))
+  (provide 
    (rename-out [free-of Free-of]
                [base Base]
                [const Const]
