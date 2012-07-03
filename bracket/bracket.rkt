@@ -1363,7 +1363,13 @@
   ; Range (as range in Racket)
   (check-equal? (Range 5)      (List 0 1 2 3 4))
   (check-equal? (Range 2 5)    (List 2 3 4))
+  (check-equal? (Range 5 2)    (List))
   (check-equal? (Range 2 10 3) (List 2 5 8))
+  (check-equal? (Range)        '(Range))
+  (check-equal? (Range 1 2 3 4) '(Range 1 2 3 4))
+  (check-equal? (Range x)     '(Range x))
+  (check-equal? (Range x y)   '(Range x y))
+  (check-equal? (Range x y z) '(Range x y z))
   )
 
 
