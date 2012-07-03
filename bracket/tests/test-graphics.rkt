@@ -1,4 +1,4 @@
-#lang mpl
+#lang bracket
 DeclareVars(x);
 Graphics({Disk()});
 Graphics({Disk({0,0})});

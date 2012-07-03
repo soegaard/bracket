@@ -1,4 +1,4 @@
-#lang mpl
+#lang bracket
 DeclareVars(x,y,z,v,v1,v2,w,w1,w2,a,b,c);
 
 sumlist(xs):=Apply(Plus,xs);
