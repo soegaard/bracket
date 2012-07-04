@@ -7,11 +7,10 @@
          (submod "bracket.rkt" bracket)
          "unparse.rkt")
 
+(provide (for-syntax #%module-begin)
+         #%module-begin)
 (provide (all-from-out racket)
          unparse)
-(provide (all-defined-out)
-         (for-syntax #%module-begin)
-         #%module-begin)
 
 (define-syntax (DeclareVars stx)
   (syntax-case stx ()
@@ -19,3 +18,5 @@
      #'(begin 
          (define sym 'sym) ...
          (set! sym 'sym) ...)]))
+
+(provide (all-defined-out))

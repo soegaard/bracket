@@ -50,8 +50,7 @@
                          (build-path base "../bracket.rkt"))))]
                     [module-name (generate-temporary "main")])
         (syntax-property 
-         (replace-context #'here
-          ;strip-context   
+         (strip-context ; reason: see read docs on read-syntax
           #'(module module-name bracket/bracket-lang
               (require (submod (file bracket.rkt) bracket)
                        (submod (file bracket.rkt) symbolic-application))
