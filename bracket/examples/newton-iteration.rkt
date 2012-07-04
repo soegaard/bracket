@@ -28,3 +28,4 @@ DeclareVars(g,x);
 NestList(g,x,5);
 % We can get the first approximations as symbolical expressions. Not pretty.
 NestList(next,x,2);
+
