@@ -145,11 +145,14 @@
 ; - A number representing the ending position of the match (or #f if eof).
 
 (define (syn-val a b c d e)
-  (values a b c 
-          (position-offset d)
+  (values a ; string with mathching text
+          b ; symbol in '(comment white-space no-color eof)
+          c ; symbol in '(|(| |)| |[| |]| |{| |}|) or #f.
+          (position-offset d)    ; start pos
           #;(position-offset e) 
-          (max (position-offset e)
-               (+ (position-offset d) 1))))
+          (max                   ; end pos
+           (position-offset e)
+           (+ (position-offset d) 1))))
 
 (define color-lexer
   ; REMEMBER to restart DrScheme to test any changes in the color-lexer.
@@ -175,8 +178,10 @@
    ; different identifiers to see whether := or ( comes after the identfier.
    ; This is enough to prevent shift/reduce conflicts between atom, definition,
    ; and application.
-   [(:or identifier:= identifierOP identifier)
+   [":="
     (syn-val lexeme 'symbol #f start-pos end-pos)]
+   [identifier
+    (syn-val lexeme 'symbol #f start-pos end-pos)]      
    [(:+ digit) 
     (syn-val lexeme 'constant #f start-pos end-pos)]
    [(:: (:+ digit) #\. (:* digit)) 

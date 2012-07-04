@@ -19,6 +19,3 @@
      #'(begin 
          (define sym 'sym) ...
          (set! sym 'sym) ...)]))
-
-
-

@@ -728,32 +728,7 @@
 
 
 
-#;(module pattern-matching racket
-    (require (submod ".." expression))
-    (define (linear-form u x)
-      ; u expression, x a symbol
-      (if (eq? u x) 
-          (list 1 0)
-          (case (kind u)
-            [(symbol-id integer fraction real complex)
-             (list 0 u)]
-            [(Times)
-             (if (free-of u x)
-                 (list 0 u)
-                 (let ([u/x (Quotient u x)])
-                   (if (Free-of u/x x)
-                       (list u/x 0)
-                       #f)))]
-            [(Plus)
-             (let ([f (linear-form (operand u 1) x)])   
-               (and f
-                    (let ([r (linear-form (Minus u (operand u 1)))])
-                      (and r
-                           (list (+ (operand f 0) (operand r 0))
-                                 (+ (operand f 1) (operand r 1)))))))]
-            [else
-             (and (free-of u x)
-                  (list 0 u))]))))
+
 
 (module equation-expression racket
   (require (submod ".." expression))
@@ -1215,7 +1190,35 @@
   ;                (eq? (Kind exponent) 'integer)
   ;                (> exponent 1))
   )
-   
+
+
+#;(module pattern-matching racket
+  (require (submod ".." expression)
+           (submod ".." bracket))
+  (define (linear-form u x)
+    ; u expression, x a symbol
+    (if (eq? u x) 
+        (list 1 0)
+        (case (kind u)
+          [(symbol-id integer fraction real complex)
+           (list 0 u)]
+          [(Times)
+           (if (free-of u x)
+               (list 0 u)
+               (let ([u/x (Quotient u x)])
+                 (if (Free-of u/x x)
+                     (list u/x 0)
+                     #f)))]
+          [(Plus)
+           (let ([f (linear-form (operand u 1) x)])   
+             (and f
+                  (let ([r (linear-form (Minus u (operand u 1)))])
+                    (and r
+                         (list (+ (operand f 0) (operand r 0))
+                               (+ (operand f 1) (operand r 1)))))))]
+          [else
+           (and (free-of u x)
+                (list 0 u))]))))
 
 (module test racket
   (require (submod ".." symbolic-application)

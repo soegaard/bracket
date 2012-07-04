@@ -24,7 +24,7 @@ NestList(f,expr,n):=if(n=0, List(expr), Cons(expr, NestList(f,f(expr),n-1)));
 % Use it!
 NestList(next,x0,7);
 % NestList also works symbolically.
-DeclareVars(g,x);
-NestList(g,x,5);
+%DeclareVars(g,x);
+%NestList(g,x,5);
 % We can get the first approximations as symbolical expressions. Not pretty.
-NestList(next,x,2);
+%NestList(next,x,2);
