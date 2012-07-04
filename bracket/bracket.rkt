@@ -861,15 +861,14 @@
     (concurrent-substitute u ts rs))
   
   (define (Equal u1 u2)
-    (define out
     (cond
       [(and (number? u1) (number? u2))
        (= u1 u2)]
       [(and (string? u1) (string? u2))
        (string=? u1 u2)]
+      [(equal? u1 u2)
+       true]
       [else (construct 'Equal (list u1 u2))]))
-    (displayln (list 'Equal u1 u1 '=> out))
-    out)
   
   (define (Expand u)
     ; [Cohen, Elem, p.253]
