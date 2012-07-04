@@ -1225,6 +1225,33 @@
            (and (free-of u x)
                 (List 0 u))]))))
 
+(module solve racket
+  (require (submod ".." expression)
+           (submod ".." bracket)
+           (submod ".." pattern-matching))
+  
+  (provide Solve)
+  
+  (define-match-expander List: 
+    (λ (stx)
+      (syntax-case stx ()
+        [(_ pat ...) #'(list 'List pat ...)])))
+  
+  (define-match-expander Equal: 
+    (λ (stx)
+      (syntax-case stx ()
+        [(_ pat1 pat2) #'(list 'Equal pat1 pat2)])))
+  
+  (define (Solve u x)
+    (match u
+      [(Equal: u1 u2)
+       (match (Match-linear-form (Minus u1 u2) x)
+         [(List: a b) 
+          ; ax+b=0 => x= -b/a
+          (Equal x (Quotient (Minus b) a))])]
+      [_ #f])))
+    
+
 (module test racket
   (require (submod ".." symbolic-application)
            (submod ".." bracket)
@@ -1393,6 +1420,14 @@
   (check-equal? (Match-linear-form (Times 3 x x y) x) #f)
   (check-equal? (Match-linear-form (Plus 3 (Power x 2) y) x) #f)
   (check-equal? (Match-linear-form (Plus 3 x y) x) (List 1 (Plus 3 y)))
+  ; List:
+  ; Equal:
+  
+  ;;; Solve
+  (require (submod ".." solve))
+  (check-equal? (Solve (Equal x 1) x) (Equal x 1))
+  (check-equal? (Solve (Equal (Times 2 x) 1) x) (Equal x 1/2))
+  (check-equal? (Solve (Equal (Times a x) b) x) (Equal x (Quotient b a)))
   
   )
 

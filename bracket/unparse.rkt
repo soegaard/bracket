@@ -5,7 +5,9 @@
 
 (provide unparse)
 
-(require (submod "bracket.rkt" expression-core))
+(require (submod "bracket.rkt" expression-core)
+         (submod "bracket.rkt" equation-expression))
+
 
 (define (map/first? base f xs)
   (cond
@@ -48,10 +50,15 @@
   (case (operator form)
     [(Times) 
      (define ops (operands form))
-     (define unwrapped
-       (string-append* (add-between (map unparse-factor ops) "*")))
-     (wrap-if (and level-below-times? (>= (length ops) 2))
-              unwrapped)]
+     (cond
+       [(empty? ops) "1"]
+       [(eqv? (first ops) -1)
+        (string-append "-" (unparse-product (cons 'Times (rest ops))))]
+       [else
+        (define unwrapped
+          (string-append* (add-between (map unparse-factor ops) "*")))
+        (wrap-if (and level-below-times? (>= (length ops) 2))
+                 unwrapped)])]
     [else
      (unparse-factor form first?)]))
 
@@ -80,10 +87,14 @@
     [(times-expression? form) ; This case is for unsimplified expressions
      (format "(~a)" (unparse-product form #t))]
     [(compound-expression? form)
-     ; Note: Set expressions are compound expressions.
-     (format "~a(~a)" (operator form)
-             (string-append* (add-between (map/first? #t unparse (operands form)) ",")))]
-    
+     (case (kind form)
+       [(Equal)
+        (define-values (t r) (equation->sides form))
+        (format "~a=~a" (unparse t) (unparse r))]
+       [else
+        ; Note: Set expressions are compound expressions.
+        (format "~a(~a)" (operator form)
+                (string-append* (add-between (map/first? #t unparse (operands form)) ",")))])]
     [else
      ; TODO: pass value unchanged: stuff like #void, #eof, special values etc.
      (format "~a" (object-name form))
@@ -102,6 +113,7 @@
 
 (module* test #f
   (require rackunit )
+  (require (submod "bracket.rkt" bracket))
   (define x 'x)
   (define y 'y)
   (define z 'z)
@@ -125,6 +137,7 @@
   (check-equal? (unparse '(Plus -1 x)) "-1+x")
   (check-equal? (unparse '(Plus 2/3 x)) "2/3+x")
   (check-equal? (unparse '(Plus 2.0 x)) "2.0+x")
+  (check-equal? (unparse (Minus x)) "-x")
   ; Products
   (check-equal? (unparse '(Times 2 x)) "2*x")
   (check-equal? (unparse '(Times 2/3 x)) "2/3*x")
@@ -169,4 +182,6 @@
   (check-equal? (unparse '(Set 1)) "Set(1)")
   (check-equal? (unparse '(Set 1 2)) "Set(1,2)")
   (check-equal? (unparse '(Set 1 2 3)) "Set(1,2,3)")
+  ; Equal
+  (check-equal? (unparse '(Equal x 2)) "x=2")
   )
