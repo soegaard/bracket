@@ -95,6 +95,10 @@
         ; Note: Set expressions are compound expressions.
         (format "~a(~a)" (operator form)
                 (string-append* (add-between (map/first? #t unparse (operands form)) ",")))])]
+    [(eq? form #t)
+     "true"]
+    [(eq? form #f)
+     "false"]
     [else
      ; TODO: pass value unchanged: stuff like #void, #eof, special values etc.
      (format "~a" (object-name form))
@@ -184,4 +188,7 @@
   (check-equal? (unparse '(Set 1 2 3)) "Set(1,2,3)")
   ; Equal
   (check-equal? (unparse '(Equal x 2)) "x=2")
+  ; Booleans
+  (check-equal? (unparse #t) "true")
+  (check-equal? (unparse #f) "false")
   )
