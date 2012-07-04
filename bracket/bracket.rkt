@@ -1192,33 +1192,38 @@
   )
 
 
-#;(module pattern-matching racket
+(module pattern-matching racket
   (require (submod ".." expression)
            (submod ".." bracket))
-  (define (linear-form u x)
-    ; u expression, x a symbol
+  
+  (provide Match-linear-form)
+  
+  (define (Match-linear-form u x)
+    ; INPUT u expression, x a symbol
+    ; Checks if u has the form ax+b.
+    ; If so List(a,b) is returned, otherwise #f
     (if (eq? u x) 
-        (list 1 0)
+        (List 1 0)
         (case (kind u)
           [(symbol-id integer fraction real complex)
-           (list 0 u)]
+           (List 0 u)]
           [(Times)
            (if (free-of u x)
-               (list 0 u)
+               (List 0 u)
                (let ([u/x (Quotient u x)])
                  (if (Free-of u/x x)
-                     (list u/x 0)
+                     (List u/x 0)
                      #f)))]
           [(Plus)
-           (let ([f (linear-form (operand u 1) x)])   
+           (let ([f (Match-linear-form (operand u 1) x)])   
              (and f
-                  (let ([r (linear-form (Minus u (operand u 1)))])
+                  (let ([r (Match-linear-form (Minus u (operand u 1)) x)])
                     (and r
-                         (list (+ (operand f 0) (operand r 0))
-                               (+ (operand f 1) (operand r 1)))))))]
+                         (List (Plus (operand f 0) (operand r 0))
+                               (Plus (operand f 1) (operand r 1)))))))]
           [else
            (and (free-of u x)
-                (list 0 u))]))))
+                (List 0 u))]))))
 
 (module test racket
   (require (submod ".." symbolic-application)
@@ -1374,6 +1379,21 @@
   (check-equal? (Range x)     '(Range x))
   (check-equal? (Range x y)   '(Range x y))
   (check-equal? (Range x y z) '(Range x y z))
+  
+  ;;; Pattern Matching
+  ; Match-linear-form
+  (require (submod ".." pattern-matching))
+  (check-equal? (Match-linear-form 42 x) (List 0 42))
+  (check-equal? (Match-linear-form (Times 42 x) x) (List 42 0))
+  (check-equal? (Match-linear-form (Times 42 x) y) (List 0 (Times 42 x)))
+  (check-equal? (Match-linear-form x x) (List 1 0))
+  (check-equal? (Match-linear-form (Sin x) x) #f)
+  (check-equal? (Match-linear-form (Plus 2 (Sin x)) x) #f)
+  (check-equal? (Match-linear-form (Power x 2) x) #f)
+  (check-equal? (Match-linear-form (Times 3 x x y) x) #f)
+  (check-equal? (Match-linear-form (Plus 3 (Power x 2) y) x) #f)
+  (check-equal? (Match-linear-form (Plus 3 x y) x) (List 1 (Plus 3 y)))
+  
   )
 
 
