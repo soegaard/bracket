@@ -618,7 +618,7 @@
   
   
   
-  (define (simplify-minus ops) 
+  (define (simplify-minus ops)     
     ; - unary and binary does not occur in simplified expressions
     ; - (Minus x) => (Times -1 x)
     ; - (Minus a b) => (Plus a (Times -1 b))
@@ -861,6 +861,7 @@
     (concurrent-substitute u ts rs))
   
   (define (Equal u1 u2)
+    (displayln (list 'Equal u1 u2))
     (cond
       [(and (number? u1) (number? u2))
        (= u1 u2)]
@@ -868,9 +869,12 @@
        (string=? u1 u2)]
       [(equal? u1 u2)
        true]
+      #;[(equal? (Expand (Minus u1 u2)) 0)
+         true]
       [else (construct 'Equal (list u1 u2))]))
   
   (define (Expand u)
+    (displayln u)
     ; [Cohen, Elem, p.253]
     (case (kind u)
       [(Plus) 
@@ -887,7 +891,9 @@
                  [(power-expression? u) (Expand-power u)]
                  [else u]))
         (Expand-product (Expand v)
-                        (Expand (Quotient u v))))]
+                        (Expand (Quotient u v))))
+       #;(Expand-product (Expand v)
+                        (Expand (Quotient u v)))]
       [(Power)
        (define base (Operand u 0))
        (define exponent (Operand u 1))
@@ -1424,6 +1430,7 @@
   (check-equal? (Match-linear-form (Plus 3 x y) x) (List 1 (Plus 3 y)))
   ; List:
   ; Equal:
+  ;(check-equal? (Equal (Power (Minus x 1) 2) (Plus (Power x 2) (Times -2 x) 1)) true)
   
   ;;; Solve
   (require (submod ".." solve))

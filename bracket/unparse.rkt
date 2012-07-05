@@ -6,7 +6,8 @@
 (provide unparse)
 
 (require (submod "bracket.rkt" expression-core)
-         (submod "bracket.rkt" equation-expression))
+         (submod "bracket.rkt" equation-expression)
+         (submod "bracket.rkt" bracket))
 
 
 (define (map/first? base f xs)
@@ -55,10 +56,23 @@
        [(eqv? (first ops) -1)
         (string-append "-" (unparse-product (cons 'Times (rest ops))))]
        [else
-        (define unwrapped
-          (string-append* (add-between (map unparse-factor ops) "*")))
-        (wrap-if (and level-below-times? (>= (length ops) 2))
-                 unwrapped)])]
+        (define-values (den num)  
+          (partition (λ (f) (and (power-expression? f)
+                                 (number? (exponent f))
+                                 (negative? (exponent f))))
+                     ops))
+        (set! den (map (λ (f) (Power (base f) (- (exponent f)))) den))
+        (define (format-factors ops)
+          (define unwrapped
+            (string-append* (add-between (map unparse-factor ops) "*")))
+          (wrap-if (and level-below-times? (>= (length ops) 2))
+                   unwrapped))
+        (if (empty? den)
+            (format-factors num)
+            (format "~a/~a" 
+                    (format-factors num) 
+                    (wrap-if (>= (length den) 2)
+                             (unparse (apply Times den)))))])]
     [else
      (unparse-factor form first?)]))
 
@@ -148,6 +162,9 @@
   (check-equal? (unparse '(Times -2 x)) "-2*x")
   ; Products of products (unsimplified)
   (check-equal? (unparse '(Times 2 (Times 3 x) (Times -5 y))) "2*(3*x)*(-5*y)")
+  ; Products with factors with negative exponents
+  (check-equal? (unparse (Quotient x y)) "x/y")
+  (check-equal? (unparse (Quotient x (Times y z))) "x/(y*z)")
   ; Powers
   (check-equal? (unparse '(Power 2 3)) "2^3")
   (check-equal? (unparse '(Power -2 3)) "(-2)^3")
