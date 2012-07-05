@@ -861,7 +861,6 @@
     (concurrent-substitute u ts rs))
   
   (define (Equal u1 u2)
-    (displayln (list 'Equal u1 u2))
     (cond
       [(and (number? u1) (number? u2))
        (= u1 u2)]
@@ -869,6 +868,7 @@
        (string=? u1 u2)]
       [(equal? u1 u2)
        true]
+      ; TODO: Reactivate this clause when bug in Expand is found.
       #;[(equal? (Expand (Minus u1 u2)) 0)
          true]
       [else (construct 'Equal (list u1 u2))]))
