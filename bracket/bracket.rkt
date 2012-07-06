@@ -262,7 +262,9 @@
            [(Power)    (simplify-power us)]
            [(Minus)    (simplify-minus us)]        
            [(Quotient) (simplify-quotient us)]
-           [else       (construct op us)]))]
+           [else       
+            ; TODO: Should this be simplify-function ?
+            (construct op us)]))]
       [else
        (error 'simplify "received non-expression, in: " e)]))
   
@@ -874,26 +876,26 @@
       [else (construct 'Equal (list u1 u2))]))
   
   (define (Expand u)
-    (displayln u)
     ; [Cohen, Elem, p.253]
     (case (kind u)
       [(Plus) 
        (define v (Operand u 0))
+       #;(displayln (list u '=> v (Minus u v)))
        (Plus (Expand v)
              (Expand (Minus u v)))]
       [(Times)
        (define v (Operand u 0))
-       (Fix-point ; TODO: neeeded ?
-        (λ (u) (cond
-                 [(times-expression? u)
-                  (Expand-product (Operand u 0) 
-                                  (Quotient u (Operand u 0)))]
-                 [(power-expression? u) (Expand-power u)]
-                 [else u]))
-        (Expand-product (Expand v)
-                        (Expand (Quotient u v))))
-       #;(Expand-product (Expand v)
-                        (Expand (Quotient u v)))]
+       #;(Fix-point ; TODO: neeeded ?
+          (λ (u) (cond
+                   [(times-expression? u)
+                    (Expand-product (Operand u 0) 
+                                    (Quotient u (Operand u 0)))]
+                   [(power-expression? u) (Expand-power u)]
+                   [else u]))
+          (Expand-product (Expand v)
+                          (Expand (Quotient u v))))
+       (Expand-product (Expand v)
+                       (Expand (Quotient u v)))]
       [(Power)
        (define base (Operand u 0))
        (define exponent (Operand u 1))
@@ -913,7 +915,8 @@
       [(eq? (Kind s) 'Plus)
        (Expand-product s r)]
       [else
-       (Fix-point  ; TODO: neeeded ?
+       (Times r s)
+       #;(Fix-point  ; TODO: neeeded ?
         (λ (u)
           (if (power-expression? u)
               (let ([n (exponent u)])
@@ -1388,7 +1391,21 @@
   (check-equal? (Expand (Power (Plus a b) 2))
                 (Plus (Power a 2) (Times 2 a b) (Power b 2)))
   (check-equal? (Expand (Times a (Plus x y)))
-                (Plus (Times a x) (Times a y)))  
+                (Plus (Times a x) (Times a y)))
+  (check-equal? (Expand (Times (Plus x 2) (Plus x 3) (Plus x 4)))
+                (Plus (Power x 3) (Times 9 (Power x 2)) (Times 26 x) 24))
+  (check-equal? (Expand (Power (Plus x y z) 3))
+                (Plus (Power x 3) (Power y 3) (Power z 3)
+                      (Times 3 (Power x 2) y) (Times 3 (Power x 2) z)
+                      (Times 3 (Power y 2) x) (Times 3 (Power y 2) z)
+                      (Times 3 (Power z 2) x) (Times 3 (Power z 2) y)
+                      (Times 6 x y z)))
+  (check-equal? (Expand (Plus (Power (Plus x 1) 2) (Power (Plus y 1) 2)))
+                (Plus (Power x 2) (Times 2 x) 
+                      (Power y 2) (Times 2 y) 2))
+  (check-equal? (Expand (Power (Plus (Power (Plus x 2) 2) 3) 2))
+                (Plus (Power x 4) (Times 8 (Power x 3))
+                      (Times 30 (Power x 2)) (Times 56 x) 49))
   ; If
   (check-equal? (If (Equal 1 1) 2 3) 2)
   (check-equal? (If (Equal 1 2) 2 3) 3)
@@ -1436,9 +1453,7 @@
   (require (submod ".." solve))
   (check-equal? (Solve (Equal x 1) x) (Equal x 1))
   (check-equal? (Solve (Equal (Times 2 x) 1) x) (Equal x 1/2))
-  (check-equal? (Solve (Equal (Times a x) b) x) (Equal x (Quotient b a)))
-  
-  )
+  (check-equal? (Solve (Equal (Times a x) b) x) (Equal x (Quotient b a))))
 
 
 #;(require (submod "." symbolic-application)
