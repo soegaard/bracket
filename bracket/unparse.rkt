@@ -7,7 +7,8 @@
 
 (require (submod "bracket.rkt" expression-core)
          (submod "bracket.rkt" equation-expression)
-         (submod "bracket.rkt" bracket))
+         (submod "bracket.rkt" bracket)
+         slideshow/pict)
 
 
 (define (map/first? base f xs)
@@ -33,16 +34,21 @@
   (unparse-sum form first? level-below-times?))
 
 (define (unparse-sum form [first? #t] [level-below-times? #f])
-  (case (operator form)
-    [(Plus)
-     (define ops (operands form))
-     (define unwrapped
-       (string-append* 
-        (maybe-add-between (map unparse-product ops) "+" #\-)))
-     (wrap-if (and level-below-times? (>= (length ops) 2))
-              unwrapped)]
-    [else
-     (unparse-product form first? level-below-times?)]))
+  (if (pict? form)
+      form ; hack: A single pict is returned as is
+           ; The unparse functions needs to return
+           ; something else than just strings in order
+           ; support other values such as snips.
+      (case (operator form)
+        [(Plus)
+         (define ops (operands form))
+         (define unwrapped
+           (string-append* 
+            (maybe-add-between (map unparse-product ops) "+" #\-)))
+         (wrap-if (and level-below-times? (>= (length ops) 2))
+                  unwrapped)]
+        [else
+         (unparse-product form first? level-below-times?)])))
 
 (define (wrap-if test str)
   (if test (string-append "(" str ")") str))
@@ -135,7 +141,7 @@
   (define x 'x)
   (define y 'y)
   (define z 'z)
-    
+  
   (displayln "TEST - Running tests in unparse.rkt")
   
   ;;; Numbers

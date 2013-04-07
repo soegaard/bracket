@@ -21,7 +21,10 @@
   (current-print 
    (λ (val) 
      (unless (void? val)
-       (displayln (unparse val)))))
+       (define u (unparse val))
+       (if (string? u)
+           (displayln u)
+           (old-print u))))) ; pict hack
   )
 
 
