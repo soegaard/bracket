@@ -394,7 +394,7 @@
   
   (define/memo (simplify-times ops) 
     ;(displayln (list 'simplify-times ops))
-    ; the operands os are simplified
+    ; the operands ops are simplified
     ; (Times op1 op2 op ...) 
     ;   - n-ary, n>=2
     ;   - no operands are products
@@ -439,8 +439,10 @@
          [(and (list-expression? u1) (list-expression? u2)
                (= (length u1) (length u2)))
           (construct
-           'List (append-map (λ (u1i u2i) (simplify-times-rec (list u1i u2i)))
-                             (operands u1) (operands u2)))]
+           'List (map 
+                  (λ (u1i u2i) 
+                    (construct 'Times (simplify-times-rec (list u1i u2i))))
+                  (operands u1) (operands u2)))]
          [(and (list-expression? u1) (list-expression? u2))
           ; lists of different lengths => do nothing
           (list u1 u2)]
@@ -895,7 +897,7 @@
           (Expand-product (Expand v)
                           (Expand (Quotient u v))))
        (Expand-product (Expand v)
-                       (Expand (Quotient u v)))]
+                         (Expand (Quotient u v)))]
       [(Power)
        (define base (Operand u 0))
        (define exponent (Operand u 1))
