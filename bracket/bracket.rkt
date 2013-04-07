@@ -74,7 +74,8 @@
   
   (define (holdable? o)
     (and (symbol? o)
-         (memq o '(Hold))))
+         (eq? o 'Hold)
+         #;(memq o '(Hold))))
   
   ; In the BRACKET language an application of
   ; a non-function evaluates to an expression.
@@ -886,14 +887,17 @@
          true]
       [else (construct 'Equal (list u1 u2))]))
   
-  (define (Expand u)
+  (define  (Expand u)
     ; [Cohen, Elem, p.253]
     (case (kind u)
       [(Plus) 
        (define v (Operand u 0))
-       #;(displayln (list u '=> v (Minus u v)))
-       (Plus (Expand v)
-             (Expand (Minus u v)))]
+       ; (displayln (list u '=> v (Minus u v)))
+       (apply Plus (map Expand (operands u)))
+       ; This: (Plus (Expand v) (Expand (Minus u v)))
+       ; is used in [Cohen] but leads to an infinite loop
+       ; when expanding (Plus 1 a (Times -1 (Plus 1 a)) x)
+       ]
       [(Times)
        (define v (Operand u 0))
        #;(Fix-point ; TODO: neeeded ?
@@ -906,7 +910,7 @@
           (Expand-product (Expand v)
                           (Expand (Quotient u v))))
        (Expand-product (Expand v)
-                         (Expand (Quotient u v)))]
+                       (Expand (Quotient u v)))]
       [(Power)
        (define base (Operand u 0))
        (define exponent (Operand u 1))
