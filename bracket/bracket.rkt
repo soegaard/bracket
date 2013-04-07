@@ -441,7 +441,9 @@
           (construct
            'List (map 
                   (λ (u1i u2i) 
-                    (construct 'Times (simplify-times-rec (list u1i u2i))))
+                    (define us (simplify-times-rec (list u1i u2i)))
+                    (cond [(empty? (rest us)) (first us)]
+                          [else               (construct 'Times us)]))
                   (operands u1) (operands u2)))]
          [(and (list-expression? u1) (list-expression? u2))
           ; lists of different lengths => do nothing
