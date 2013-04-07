@@ -452,16 +452,23 @@
           (construct 
            'List
            (map (λ (u1i) 
-                  (construct 'Times
-                             (simplify-times-rec (cons u2 (list u1i)))))
-                (operands u1)))]
+                  (let ([us (simplify-times-rec (cons u2 (list u1i)))])
+                    ; If length(us)>=2 wrap with Times
+                    (if (empty? (rest us))
+                        (first us)
+                        (construct 'Times us))))
+                (operands u1)))]  
          [(list-expression? u2)
           (construct
            'List
-           (map (λ (u2i) 
-                  (construct 'Times
-                             (simplify-times-rec (cons u1 (list u2i)))))
-                (operands u2)))]
+           (map 
+            (λ (u2i) 
+              (let ([us (simplify-times-rec (cons u1 (list u2i)))])
+                ; If length(us)>=2 wrap with Times
+                (if (empty? (rest us))
+                    (first us)
+                    (construct 'Times us))))
+            (operands u2)))]         
          [(equal? (base u1) (base u2))
           (define s (simplify-plus  (list (exponent u1) (exponent u2))))
           (define p (simplify-power (list (base u1) s)))
@@ -1342,6 +1349,8 @@
   (check-equal? (Plus 3 (List 1 x)) (List 4 (Plus x 3)))
   (check-equal? (Plus y (List 1 x)) (List (Plus 1 y) (Plus x y)))
   (check-equal? (Times (List 1 x)) (List 1 x))
+  (check-equal? (Times (List 1 x) 4) (List 4 (Times 4 x)))
+  (check-equal? (Times 4 (List 1 x)) (List 4 (Times 4 x)))
   (check-equal? (Times (List 1 2) (List 4 5)) (List 4 10))
   (check-equal? (Power (List 3 x) 2) (List 9 (Power x 2)))
   ; No threading when lists are of different lenghts
