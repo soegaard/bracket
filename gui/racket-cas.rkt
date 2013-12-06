@@ -18,6 +18,8 @@
 ;; Editor:      Text size.
 ;; Editor:      Save and load.
 ;; Editor:      When inserting part copied from MathBox, automatically insert new MathBox.
+;; Editor:      Keybindings for λ α β γ δ ε ∆ Λ works in MathBox. Should work outside too.
+;;              (Partially done. β and bold clashes) More greek letters?
 ;; Parser:      Extend f(x):=expr syntax to 2 or more variables.
 ;; Evaluation:  Get syntax-location from math-text%
 ;; Keymaps:     Insertion of greek, and, mathematical characters.
@@ -31,12 +33,6 @@
 ;; Snips:       Right-click menu: Options such output on/off.
 ;; Snips:       Represent equations, integrals etc with small graphs ala Wolfram Alpha.
 ;; Educational: Recognize standard equations and offer step by step solutions.
-
-;; LIMBO
-
-;; PlotCanvas: Add "copy plot as image". set-clipboard-image is unimplmented :-(
-;;             (Fixed on OS X)
-
 
 ;; DONE
 ;;
@@ -57,6 +53,7 @@
 ;; NSolve:     Implemented bisection and Brent.
 ;; Snips:      Right-click menu: Evaluation options such output on/off. 
 ;; Errors:     Errors and warnings can be signaled with user-error and user-warning
+;; PlotCanvas: Add "copy plot as image". 
 
 
 ;; IDEAS
@@ -70,8 +67,8 @@
          (except-in plot plot points)
          (prefix-in plot: plot)
          "../infix/main.rkt"
-         "../infix/parser.rkt"
-         (except-in (planet williams/science/math) infinite? nan?)
+         "../infix/parser.rkt"  
+         (planet williams/science/math)
          "../numeric/root-finding.rkt"
          "../utils/clipboard.rkt")
 
@@ -94,7 +91,7 @@
   (if (exact? x) (exact->inexact x) x))
 
 ;;;
-;;;
+;;; GLOBAL VARIABLES
 ;;;
 
 (define all-math-texts '())
@@ -128,7 +125,7 @@
   (define (ensure-number-function f)
     (lambda (x)
       (let ([v (f x)])
-        (if (number? v) v 0))))  
+        (if (number? v) v 0))))
   (add-renderer! (function (ensure-number-function f) x-min x-max
     #:y-min y-min     #:y-max y-max
     #:samples samples #:color color
@@ -147,8 +144,8 @@
  	 	#:alpha alpha	 	 	 	 
  	 	#:label label])
 
-#;(lines	 	vs	 	 	 	 
-                        [	#:x-min x-min	 	 	 	 
+#;(lines vs	 	 	 	 
+         [	#:x-min x-min	 	 	 	 
  	 	#:x-max x-max	 	 	 	 
  	 	#:y-min y-min	 	 	 	 
  	 	#:y-max y-max	 	 	 	 
@@ -393,14 +390,7 @@
          (let* ([bm (send plot-canvas make-bitmap (send plot-canvas get-width) (send plot-canvas get-height))]
                 [dc (new bitmap-dc% [bitmap bm])])
            (draw-plot dc)
-           bm))
-                
-        ; TODO: Use this when set-clipboard-bitmap is implemented in the racket gui
-        #;(send the-clipboard set-clipboard-bitmap
-                (let* ([bm (send plot-canvas make-bitmap (send plot-canvas get-width) (send plot-canvas get-height))]
-                       [dc (new bitmap-dc% [bitmap bm])])
-                  (draw-plot dc)
-                  bm)))])
+           bm)))])
 
 
 (define plot-canvas%
@@ -506,15 +496,26 @@
                              (list 'src-name 1 0 1 (string-length str)))
               (open-input-string str))))))
 
+(define (register-greek keymap)
+  (define (register name char shortcuts)
+    (let ([insert-name (string-append "insert-" name)])
+      (send keymap add-function insert-name
+            (λ (ed e) (send ed insert char)))
+      (for ([shortcut shortcuts])
+        (send keymap map-function shortcut insert-name))))
+  (register "lambda"  #\λ '("d:\\" "c:\\"))
+  (register "Lambda"  #\Λ '("c:L"))
+  (register "alpha"   #\α '("c:a"))
+  (register "beta"    #\β '("c:b")) ; TODO: Taken by bold
+  (register "gamma"   #\γ '("c:g"))
+  (register "delta"   #\δ '("c:d"))
+  (register "epsilon" #\ε '("c:e"))
+  (register "rho"     #\ρ '("c:r"))
+  (register "Gamma"   #\Γ '("c:G"))
+  (register "Delta"   #\∆ '("c:D")))
+
 (define (install-math-snip-keymap math-snip)
   (let ([keymap (send (send math-snip get-editor) get-keymap)])
-    
-    (define (register name char shortcuts)
-      (let ([insert-name (string-append "insert-" name)])
-        (send keymap add-function insert-name
-              (λ (ed e) (send ed insert char)))
-        (for ([shortcut shortcuts])
-          (send keymap map-function shortcut insert-name))))
     
     (send keymap add-function "evaluate-math" 
           (λ (ed e) (send ed evaluate)))
@@ -539,16 +540,8 @@
     (send keymap add-function "newline"
       (λ (ed e) (send ed insert #\newline)))
     
-    (register "lambda"  #\λ '("d:\\" "c:\\"))
-    (register "Lambda"  #\Λ '("c:L"))
-    (register "alpha"   #\α '("c:a"))
-    (register "beta"    #\β '("c:b"))
-    (register "gamma"   #\γ '("c:g"))
-    (register "delta"   #\δ '("c:d"))
-    (register "epsilon" #\ε '("c:e"))
-    (register "rho"     #\ρ '("c:r"))
-    (register "Gamma"   #\Γ '("c:G"))
-    (register "Delta"   #\∆ '("c:D"))
+    (register-greek keymap)
+    
     
     (send keymap map-function "s:enter" "newline")
     (send keymap map-function "enter" "evaluate-math")
@@ -562,6 +555,7 @@
 ;;;
 
 (define keymap (send text-editor get-keymap))
+(register-greek keymap)
 
 ;(add-editor-keymap-functions keymap) 
 ;(add-text-keymap-functions keymap)
@@ -623,7 +617,7 @@
 
 (send keymap map-function "c:m" "insert-math")
 (send keymap map-function "d:m" "insert-math") ; OS X cmd
-(send keymap map-function "~s:left" "left-willing-to-enter-math-snip")
+(send keymap map-function "~s:left"  "left-willing-to-enter-math-snip")
 (send keymap map-function "~s:right" "right-willing-to-enter-math-snip")
 (send keymap map-function "c:b" "bold")   ; Win   ctrl
 (send keymap map-function "d:b" "bold")   ; OS X  cmd
