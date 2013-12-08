@@ -240,7 +240,9 @@
            "undefined.rkt"
            #;(submod ".." undefined)
            (submod ".." identifiers))
-  (require (planet dherman/memoize:3:1))
+  (require ; (planet dherman/memoize:3:1)
+           memoize ; install with install.rkt
+           )
   
   (provide simplify 
            simplify-plus

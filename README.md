@@ -20,4 +20,9 @@ just begon.
 
 Spin off mathematics libraries will be made available on PLaneT.
 
+Installation
+============
+Open and run install.rkt in DrRacket to install the packages
+that Bracket uses.
+
 /soegaard
