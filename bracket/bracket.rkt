@@ -799,6 +799,7 @@
    Sin Cos Tan Sqrt
    Solve-quadratic
    Solve-linear
+   TaylorSin
    List->Set
    Define
    Range
@@ -887,7 +888,7 @@
       ; TODO: Reactivate this clause when bug in Expand is found.
       #;[(equal? (Expand (Minus u1 u2)) 0)
          true]
-      [else (construct 'Equal (list u1 u2))]))
+      [else (construct 'Equal (list u1 u2))]))        
   
   (define  (Expand u)
     ; [Cohen, Elem, p.253]
@@ -1142,6 +1143,20 @@
             (not (number? a)))
         (List (Minus (Quotient b a)))
         (List)))
+  
+  (define (TaylorSin x a n)
+    (define (fact m) (if (zero? m) 1 (* m (fact (- m 1)))))
+    (define (dSin i a) ; nth deriviative of sin in a
+      (case (remainder i 4)
+        [(0) (Sin a)] [(1) (Cos a)] [(2) (Minus (Sin a))] [(3) (Minus (Cos a))]))
+        
+    ; The Taylor of polynomial of sin of degree n in the variable x
+    ; f(x)   ~ f(a) + f'(a)/1!*(x-a) + f''(a)/2!*(x-a)^2 + ...
+    ; sin(x) ~ x - x^3/3! + x^5/5! - x^7/7! + ...
+    (define x-a (Minus x a))
+    (apply Plus (for/list ([i (in-range 1 (+ n 1) 2)])
+                  (Times (Quotient (dSin i a) (fact i))
+                         (Power x-a i)))))
   
   (define Range 
     ; 0-based when only given imax
