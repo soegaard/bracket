@@ -31,8 +31,8 @@
 (define (increase-count) 
   (set! count (+ count 1)))
 
-; Plotting an arbitrary function without knowdledge of any
-; points in the domain where the function can ne undefined
+; Plotting an arbitrary function without knowledge of any
+; points in the domain where the function can be undefined
 ; risks triggering various exceptions. Handle these and 
 ; return #f to signal x is not in the domain.
 (define (wrap f excluded-from-domain? [value-returned-on-error #f])
@@ -44,7 +44,7 @@
           (f x)))))
 
 (define (hill-or-valley? a b c)
-  ; (x1,a) (x2,b) (x3,c) points with a<b<c
+  ; (x1,a) (x2,b) (x3,c) points with x1<x2<x3
   ; Check whether the middle number is below 
   ; or above the two other numbers.
   (or (and (< b a) (< b c))
